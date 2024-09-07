@@ -1,0 +1,417 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Syne:wght@400..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+  transition: all 0.3s;
+}
+
+html {
+  background-color: #fff;
+  scroll-behavior: smooth;
+}
+
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 140px;
+  height: 100vh;
+  background-color: #EBEEF0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow: hidden;
+}
+nav div {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+nav div:hover {
+  background-color: rgba(255, 255, 255, 0.35);
+}
+nav div:hover svg * {
+  fill: #5934EE;
+  stroke: #fff;
+}
+nav div.active {
+  background-color: #fff;
+}
+nav div.active svg * {
+  fill: #5934EE;
+  stroke: #fff;
+}
+nav hr {
+  width: 70%;
+  color: #C9CDCE;
+  opacity: 0.35;
+  margin: 15px 0;
+}
+
+main {
+  position: absolute;
+  top: 0;
+  left: 140px;
+  width: calc(100% - 140px);
+  padding: 60px 125px;
+}
+main section {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 50px;
+}
+main section header {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 30px;
+}
+main section header h1 {
+  width: -moz-fit-content;
+  width: fit-content;
+  flex-grow: 1;
+  font-family: "Syne", sans-serif;
+  font-size: 55px;
+  font-weight: 700;
+}
+main section header h1 span {
+  font-family: "Syne", sans-serif;
+  color: #5934EE;
+}
+main section header .dataBTN {
+  width: 200px;
+  height: -moz-fit-content;
+  height: fit-content;
+  padding: 15px 0;
+  background-color: #F8F8F8;
+  border-width: 0 0 3px 0;
+  border-style: solid;
+  border-color: rgba(89, 52, 238, 0.25);
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 1%;
+}
+main section header .dataBTN:hover {
+  border-color: #5934EE;
+}
+main section header .saveBTN {
+  width: 200px;
+  height: -moz-fit-content;
+  height: fit-content;
+  padding: 14px 0;
+  background-color: #F8F8F8;
+  border-width: 3px;
+  border-style: solid;
+  border-color: #5934EE;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  letter-spacing: 1%;
+}
+main section header .saveBTN:hover {
+  background-color: #5934EE;
+  color: #F8F8F8;
+}
+main section > div {
+  flex-basis: fit-content;
+  flex-grow: 1;
+  padding: 40px 55px;
+  border-radius: 5px;
+  display: flex;
+  flex-direction: column;
+  background-color: #F8F8F8;
+  border: 1px solid #E2E5E7;
+  gap: 30px;
+}
+main section > div h2 {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+}
+main section > div .field {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+main section > div .field* {
+  opacity: 1;
+  transition: opacity 0.3s ease;
+}
+main section > div .field p {
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+}
+main section > div .field input[type=number],
+main section > div .field input[type=text],
+main section > div .field select,
+main section > div .field .constraintsSwitch {
+  width: 100px;
+  height: 50px;
+  background-color: #fff;
+  border: 1px solid #E2E5E7;
+  border-radius: 5px;
+  -moz-appearance: textfield;
+  font-family: "Poppins", sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  text-align: center;
+  line-height: 50px;
+}
+main section > div .field input[type=number]::-webkit-inner-spin-button, main section > div .field input[type=number]::-webkit-outer-spin-button,
+main section > div .field input[type=text]::-webkit-inner-spin-button,
+main section > div .field input[type=text]::-webkit-outer-spin-button,
+main section > div .field select::-webkit-inner-spin-button,
+main section > div .field select::-webkit-outer-spin-button,
+main section > div .field .constraintsSwitch::-webkit-inner-spin-button,
+main section > div .field .constraintsSwitch::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+main section > div .field input[type=number]:disabled,
+main section > div .field input[type=text]:disabled,
+main section > div .field select:disabled,
+main section > div .field .constraintsSwitch:disabled {
+  opacity: 0.5;
+}
+main section > div .field .constraintsSwitch {
+  cursor: pointer;
+}
+main section > div .stacked {
+  gap: 15px;
+  flex-wrap: wrap;
+}
+main section > div .stacked > p {
+  width: 100%;
+}
+main section > div .stacked div {
+  text-align: center;
+}
+main section > div .stacked div p {
+  margin-top: 5px;
+}
+main section footer {
+  margin-top: 15px;
+  margin-bottom: -30px;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 300;
+}
+main section footer .copyrightMainInfo {
+  color: #5934EE;
+  font-weight: 400;
+}
+main section.active {
+  display: flex;
+}
+main section.fade-out {
+  opacity: 0;
+}
+main section.fade-in {
+  opacity: 1 !important;
+}
+main section:not(.active) {
+  display: none;
+}
+main section#systemParams > div:nth-of-type(1) {
+  flex-basis: 100%;
+}
+main section#systemParams > div:nth-of-type(1) p {
+  font-weight: 500;
+}
+main section#systemParams > div:nth-of-type(2) > div {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+main section#systemParams > div:nth-of-type(2) > div .field {
+  width: 100%;
+  justify-content: space-between;
+}
+main section#systemParams > div:nth-of-type(3) {
+  flex-basis: 50%;
+}
+main section#systemParams > div:nth-of-type(3) > div {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 45px;
+}
+main section#systemParams > div:nth-of-type(3) > div > div {
+  flex-wrap: wrap;
+  min-height: 124px;
+}
+main section#problemParams > div:nth-of-type(1) {
+  flex-basis: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 30px 100px;
+}
+main section#problemParams > div:nth-of-type(1) p {
+  font-weight: 500;
+}
+main section#problemParams > div:nth-of-type(2) {
+  flex-basis: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 75px 100px;
+}
+main section#problemParams > div:nth-of-type(2) > div {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#problemParams > div:nth-of-type(2) > div .field:not(.stacked) {
+  width: 100%;
+  justify-content: space-between;
+}
+main section#problemParams > div:nth-of-type(3) {
+  flex-basis: 100%;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 75px 100px;
+}
+main section#problemParams > div:nth-of-type(3) > div {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#problemParams > div:nth-of-type(3) > div .stacked div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+main section#constraints > div:nth-of-type(1) {
+  flex-basis: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 50px 100px;
+}
+main section#constraints > div:nth-of-type(1) .field:first-of-type {
+  flex-basis: 100%;
+}
+main section#constraints > div:nth-of-type(1) .field:first-of-type > p {
+  font-weight: 500;
+}
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) .stacked div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) .field {
+  width: 100%;
+  justify-content: space-between;
+  align-items: start;
+}
+main section#constraints > div:nth-of-type(2) {
+  flex-basis: 100%;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 50px 100px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(1),
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) {
+  flex-basis: fit-content;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(1) > p,
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) > p {
+  font-weight: 500;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) {
+  flex-basis: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked div {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+main section#solution > div {
+  flex-basis: 100%;
+  flex-direction: row;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 50px 100px;
+}
+main section#solution > div canvas {
+  background-color: #fff;
+  width: 100%;
+}
+main section#solution > div > div {
+  flex-basis: 100%;
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+main section#solution > div > div h2 {
+  flex-basis: 100%;
+}
+main section#solution > div > div p {
+  flex-basis: fit-content;
+  display: flex;
+  gap: 30px;
+  background-color: #fff;
+  border: 1px solid #E2E5E7;
+  border-radius: 5px;
+  padding: 15px 30px;
+  font-weight: 400;
+}
+main section#qualityIndicators > div {
+  flex-basis: 45%;
+  flex-grow: 1;
+  flex-wrap: wrap;
+}
+main section#qualityIndicators > div > div {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+main section#qualityIndicators > div > div .field {
+  width: 100%;
+  justify-content: space-between;
+}/*# sourceMappingURL=style.css.map */
