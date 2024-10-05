@@ -102,7 +102,8 @@ main {
                 }
             }
 
-            .dataBTN {
+            .import-export,
+            .backToData {
                 width: 200px;
                 height: fit-content;
                 padding: 15px 0;
@@ -211,6 +212,24 @@ main {
                     }
                 }
 
+                .titleColumn {
+                    p {
+                        opacity: 0;
+                        user-select: none;
+                    }
+
+                    input {
+                        width: 30px;
+                        background-color: transparent;
+                        border: none;
+
+                        &:disabled {
+                            opacity: 1;
+                            color: #000;
+                        }
+                    }
+                }
+
                 .constraintsSwitch {
                     cursor: pointer;
                 }
@@ -263,6 +282,58 @@ main {
 
         &:not(.active) {
             display: none;
+        }
+
+        &#importExport {
+            >div {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                >div {
+                    flex-basis: 47.5%;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 25px;
+
+                    p {
+                        font-family: "Poppins",
+                            sans-serif;
+                        font-size: 15px;
+                        font-weight: 300;
+                        margin-bottom: 15px;
+                    }
+
+                    button {
+                        width: 200px;
+                        height: fit-content;
+                        padding: 15px 0;
+                        background-color: #fff;
+                        border-width: 3px;
+                        border-style: solid;
+                        border-color: rgba($accent-color, 0.25);
+                        border-radius: 5px;
+                        cursor: pointer;
+                        font-family: "Poppins",
+                            sans-serif;
+                        font-size: 14px;
+                        font-weight: 400;
+                        letter-spacing: 1%;
+
+                        &:hover {
+                            border-color: $accent-color
+                        }
+                    }
+                }
+
+                textarea {
+                    height: 100%;
+                    flex-basis: 47.5%;
+                    border: 1px solid $border-content-color;
+                    border-radius: 5px;
+                    padding: 15px;
+                }
+            }
         }
 
         &#systemParams {
@@ -320,6 +391,7 @@ main {
             >div:nth-of-type(2) {
                 flex-basis: 100%;
                 flex-direction: row;
+                flex-wrap: wrap;
                 justify-content: space-between;
                 gap: 75px 100px;
 
@@ -339,6 +411,7 @@ main {
             >div:nth-of-type(3) {
                 flex-basis: 100%;
                 flex-direction: row;
+                flex-wrap: wrap;
                 justify-content: space-between;
                 gap: 75px 100px;
 
@@ -360,52 +433,8 @@ main {
         }
 
         &#constraints {
+
             >div:nth-of-type(1) {
-                flex-basis: 100%;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: space-between;
-                gap: 50px 100px;
-
-
-                .field:first-of-type {
-                    flex-basis: 100%;
-
-                    >p {
-                        font-weight: 500;
-                    }
-                }
-
-                >div:nth-of-type(2) {
-                    max-width: fit-content;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 15px;
-
-                    .stacked {
-                        div {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 10px;
-                        }
-                    }
-                }
-
-                >div:nth-of-type(3) {
-                    max-width: fit-content;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 15px;
-
-                    .field {
-                        width: 100%;
-                        justify-content: space-between;
-                        align-items: start;
-                    }
-                }
-            }
-
-            >div:nth-of-type(2) {
                 flex-basis: 100%;
                 flex-direction: row;
                 flex-wrap: wrap;
@@ -438,6 +467,69 @@ main {
 
             }
 
+            >div:nth-of-type(2) {
+                flex-basis: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                gap: 50px 100px;
+
+
+                .field:first-of-type {
+                    flex-basis: 100%;
+
+                    >p {
+                        font-weight: 500;
+                    }
+                }
+
+                >div:nth-of-type(2) {
+                    max-width: fit-content;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+
+                    .field {
+                        width: 100%;
+                        justify-content: space-between;
+                        align-items: start;
+                    }
+                }
+
+                >div:nth-of-type(3) {
+                    max-width: fit-content;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 15px;
+
+                    .stacked {
+                        >div {
+                            display: flex;
+                            flex-direction: row;
+                            flex-wrap: wrap;
+                            gap: 10px;
+
+                            &:not(:nth-of-type(1)) {
+                                margin-top: 50px;
+                            }
+
+                            >p {
+                                flex-basis: 100%;
+                                font-weight: 400;
+                                text-align: left;
+                                margin-bottom: 10px;
+                            }
+
+                            div {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 10px;
+                            }
+                        }
+                    }
+                }
+            }
+
         }
 
         &#solution {
@@ -450,7 +542,8 @@ main {
 
                 canvas {
                     background-color: #fff;
-                    width: 100%;
+                    max-width: 100%;
+                    max-height: 90vh;
                 }
 
                 >div {
@@ -495,6 +588,11 @@ main {
                     .field {
                         width: 100%;
                         justify-content: space-between;
+
+                        input:disabled {
+                            opacity: 1;
+                            color: #000;
+                        }
                     }
                 }
             }

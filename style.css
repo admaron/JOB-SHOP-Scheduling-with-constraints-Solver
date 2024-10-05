@@ -88,7 +88,8 @@ main section header h1 span {
   font-family: "Syne", sans-serif;
   color: #5934EE;
 }
-main section header .dataBTN {
+main section header .import-export,
+main section header .backToData {
   width: 200px;
   height: -moz-fit-content;
   height: fit-content;
@@ -103,7 +104,8 @@ main section header .dataBTN {
   font-weight: 400;
   letter-spacing: 1%;
 }
-main section header .dataBTN:hover {
+main section header .import-export:hover,
+main section header .backToData:hover {
   border-color: #5934EE;
 }
 main section header .saveBTN {
@@ -191,6 +193,21 @@ main section > div .field select:disabled,
 main section > div .field .constraintsSwitch:disabled {
   opacity: 0.5;
 }
+main section > div .field .titleColumn p {
+  opacity: 0;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+main section > div .field .titleColumn input {
+  width: 30px;
+  background-color: transparent;
+  border: none;
+}
+main section > div .field .titleColumn input:disabled {
+  opacity: 1;
+  color: #000;
+}
 main section > div .field .constraintsSwitch {
   cursor: pointer;
 }
@@ -230,6 +247,49 @@ main section.fade-in {
 }
 main section:not(.active) {
   display: none;
+}
+main section#importExport > div {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+main section#importExport > div > div {
+  flex-basis: 47.5%;
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+main section#importExport > div > div p {
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 300;
+  margin-bottom: 15px;
+}
+main section#importExport > div > div button {
+  width: 200px;
+  height: -moz-fit-content;
+  height: fit-content;
+  padding: 15px 0;
+  background-color: #fff;
+  border-width: 3px;
+  border-style: solid;
+  border-color: rgba(89, 52, 238, 0.25);
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 1%;
+}
+main section#importExport > div > div button:hover {
+  border-color: #5934EE;
+}
+main section#importExport > div textarea {
+  height: 100%;
+  flex-basis: 47.5%;
+  border: 1px solid #E2E5E7;
+  border-radius: 5px;
+  padding: 15px;
 }
 main section#systemParams > div:nth-of-type(1) {
   flex-basis: 100%;
@@ -274,6 +334,7 @@ main section#problemParams > div:nth-of-type(1) p {
 main section#problemParams > div:nth-of-type(2) {
   flex-basis: 100%;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 75px 100px;
 }
@@ -291,6 +352,7 @@ main section#problemParams > div:nth-of-type(2) > div .field:not(.stacked) {
 main section#problemParams > div:nth-of-type(3) {
   flex-basis: 100%;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 75px 100px;
 }
@@ -310,60 +372,75 @@ main section#constraints > div:nth-of-type(1) {
   flex-basis: 100%;
   flex-direction: row;
   flex-wrap: wrap;
-  justify-content: space-between;
   gap: 50px 100px;
 }
-main section#constraints > div:nth-of-type(1) .field:first-of-type {
-  flex-basis: 100%;
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(1),
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) {
+  flex-basis: fit-content;
 }
-main section#constraints > div:nth-of-type(1) .field:first-of-type > p {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(1) > p,
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) > p {
   font-weight: 500;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) {
-  max-width: -moz-fit-content;
-  max-width: fit-content;
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) {
+  flex-basis: 100%;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) .stacked div {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) .stacked div {
   display: flex;
   flex-direction: column;
   gap: 10px;
-}
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) {
-  max-width: -moz-fit-content;
-  max-width: fit-content;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) .field {
-  width: 100%;
-  justify-content: space-between;
-  align-items: start;
 }
 main section#constraints > div:nth-of-type(2) {
   flex-basis: 100%;
   flex-direction: row;
   flex-wrap: wrap;
+  justify-content: space-between;
   gap: 50px 100px;
 }
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(1),
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) {
-  flex-basis: fit-content;
+main section#constraints > div:nth-of-type(2) .field:first-of-type {
+  flex-basis: 100%;
 }
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(1) > p,
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) > p {
+main section#constraints > div:nth-of-type(2) .field:first-of-type > p {
   font-weight: 500;
 }
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) {
-  flex-basis: 100%;
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked div {
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(2) .field {
+  width: 100%;
+  justify-content: space-between;
+  align-items: start;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) {
+  max-width: -moz-fit-content;
+  max-width: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div:not(:nth-of-type(1)) {
+  margin-top: 50px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div > p {
+  flex-basis: 100%;
+  font-weight: 400;
+  text-align: left;
+  margin-bottom: 10px;
+}
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div div {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -377,7 +454,8 @@ main section#solution > div {
 }
 main section#solution > div canvas {
   background-color: #fff;
-  width: 100%;
+  max-width: 100%;
+  max-height: 90vh;
 }
 main section#solution > div > div {
   flex-basis: 100%;
@@ -414,4 +492,8 @@ main section#qualityIndicators > div > div {
 main section#qualityIndicators > div > div .field {
   width: 100%;
   justify-content: space-between;
+}
+main section#qualityIndicators > div > div .field input:disabled {
+  opacity: 1;
+  color: #000;
 }/*# sourceMappingURL=style.css.map */

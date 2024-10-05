@@ -39,15 +39,11 @@ window.onload = () => {
     const constraintsTransportResources = document.querySelector("#constraints_TransportResources input");
     const constraintsTransportTimesWrapper = document.querySelector("#constraints_TransportTimes");
 
-    const solutionConflicts = document.querySelector("#solution_Conflicts");
-    const solutionChangeovers = document.querySelector("#solution_ChangeoversList");
-    const solutioTransports = document.querySelector("#solution_TransportList");
-
     let machines = [];
     let jobs = [];
     let changeovers = [];
     let transports = [];
-    let ganttCharts = [];
+    let ganttChart;
 
     let numberOfMachineTypes = 1;
     let numberOfMachinesOfGivenType = [];
@@ -169,13 +165,7 @@ window.onload = () => {
         jobsProcessingTimes: [10, 25, 10, 15, 10, 15, 20, 15, 20, 20, 10, 10, 15, 10, 10, 20, 25, 10, 0, 20, 0, 20, 0, 10, 0, 15, 0, 0, 0, 10, 0, 0],
         jobsRouting: [1, 2, 2, 1, 3, 2, 5, 4, 2, 1, 4, 3, 5, 3, 1, 5, 3, 5, 0, 4, 0, 1, 0, 1, 0, 4, 0, 0, 0, 5, 0, 0],
         changeoversState: "ON",
-        changeoversTimes: [
-            [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0],
-            [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0],
-            [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0],
-            [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0],
-            [0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0, 5, 5, 5, 5, 5, 5, 5, 5, 0]
-        ],
+        changeoversTimes: [0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 5, 5, 0],
         changeoversCosts: [5, 5, 7, 2, 1],
         transportState: "ON",
         transportResources: 3,
@@ -479,8 +469,8 @@ window.onload = () => {
                 solutionToUpdate = true;
 
                 let value = parseInt(input.value);
-                if (value < 0 || input.value == "") {
-                    value = 0;
+                if (value < 1 || input.value == "") {
+                    value = 1;
                     input.value = value;
                 } else if (value > 1000) {
                     value = 1000;
@@ -623,6 +613,145 @@ window.onload = () => {
 
     //* CONSTRAINTS VIEW -------------------------------------------------------------------------------------
 
+    //! Changeovers switch handler
+    constraintsChangeoversButton.addEventListener("click", (e) => {
+        changeoversStateSwitch(constraintsChangeoversButton);
+    });
+
+    function changeoversStateSwitch(e) {
+        solutionToUpdate = true;
+
+        let constraintsChangeoversTimes = constraintsChangeoversTimesWrapper.querySelectorAll("input:not(.disabled)");
+        let constraintsChangeoverCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input:not(.disabled)");
+
+        if (e.innerText == "ON") {
+            e.innerText = "OFF";
+
+            constraintsChangeoversTimes.forEach(e => {
+                e.disabled = true;
+            });
+            constraintsChangeoverCosts.forEach(e => {
+                e.disabled = true;
+            });
+        } else {
+            e.innerText = "ON";
+            constraintsChangeoversTimes.forEach(e => {
+                e.disabled = false;
+            });
+            constraintsChangeoverCosts.forEach(e => {
+                e.disabled = false;
+            });
+        }
+    }
+
+    //! Changeovers times update handler
+    function updateChangeoversTimes(jobs) {
+        const children = Array.from(constraintsChangeoversTimesWrapper.children);
+        children.forEach(child => child.remove());
+
+        //! Vertical label column
+        const fieldDiv = document.createElement('div');
+        fieldDiv.className = "titleColumn";
+
+        const p = document.createElement('p');
+        p.textContent = `.`;
+        fieldDiv.appendChild(p);
+
+        for (let j = 0; j < jobs; j++) {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.value = `J${j+1}`;
+            input.disabled = true;
+            fieldDiv.appendChild(input);
+        }
+        constraintsChangeoversTimesWrapper.appendChild(fieldDiv);
+
+        //! Dynamic content columns
+        for (let i = 0; i < jobs; i++) {
+            const fieldDiv = document.createElement('div');
+
+            const p = document.createElement('p');
+            p.textContent = `J${i+1}`;
+            fieldDiv.appendChild(p);
+
+            for (let j = 0; j < jobs; j++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.value = 0;
+
+                if (i == j) {
+                    input.disabled = true;
+                    input.className = "disabled";
+                }
+
+                //! Input validation
+                allowOnlyPositiveDecimals(input);
+
+                input.addEventListener("change", () => {
+                    solutionToUpdate = true;
+
+                    let value = parseInt(input.value);
+                    if (value < 0 || input.value == "") {
+                        value = 0;
+                        input.value = value;
+                    } else if (value > 1000) {
+                        value = 1000;
+                        input.value = value;
+                    }
+
+                    value = parseInt(value);
+                    input.value = value;
+                });
+
+                fieldDiv.appendChild(input);
+            }
+
+            constraintsChangeoversTimesWrapper.appendChild(fieldDiv);
+        }
+    }
+
+    //! Changeovers cost update handler
+    function updateChangeoversCost(number) {
+        const children = Array.from(constraintsChangeoverCostsWrapper.children);
+        children.forEach(child => child.remove());
+
+        for (let i = 0; i < number; i++) {
+            const fieldDiv = document.createElement('div');
+
+            const p = document.createElement('p');
+            p.textContent = `M${i+1}`;
+
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.value = 0;
+
+            //! Input validation
+            allowOnlyPositiveDecimals(input);
+
+            input.addEventListener("change", () => {
+                solutionToUpdate = true;
+
+                let value = parseInt(input.value);
+                if (value < 0 || input.value == "") {
+                    value = 0;
+                    input.value = value;
+                } else if (value > 1000) {
+                    value = 1000;
+                    input.value = value;
+                }
+
+                value = parseInt(value);
+                input.value = value;
+            });
+
+            fieldDiv.appendChild(p);
+            fieldDiv.appendChild(input);
+
+            constraintsChangeoverCostsWrapper.appendChild(fieldDiv);
+        }
+    }
+
+
     //! Transport switch handler
     constraintsTransportButton.addEventListener("click", (e) => {
         transportStateSwitch(constraintsTransportButton);
@@ -736,157 +865,6 @@ window.onload = () => {
     }
 
 
-    //! Changeovers switch handler
-    constraintsChangeoversButton.addEventListener("click", (e) => {
-        changeoversStateSwitch(constraintsChangeoversButton);
-    });
-
-    function changeoversStateSwitch(e) {
-        solutionToUpdate = true;
-
-        let constraintsChangeoversTimes = constraintsChangeoversTimesWrapper.querySelectorAll("input:not(.disabled)");
-        let constraintsChangeoverCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input:not(.disabled)");
-
-        if (e.innerText == "ON") {
-            e.innerText = "OFF";
-
-            constraintsChangeoversTimes.forEach(e => {
-                e.disabled = true;
-            });
-            constraintsChangeoverCosts.forEach(e => {
-                e.disabled = true;
-            });
-        } else {
-            e.innerText = "ON";
-            constraintsChangeoversTimes.forEach(e => {
-                e.disabled = false;
-            });
-            constraintsChangeoverCosts.forEach(e => {
-                e.disabled = false;
-            });
-        }
-    }
-
-    //! Changeovers times update handler
-    function updateChangeoversTimes(jobs) {
-        const children = Array.from(constraintsChangeoversTimesWrapper.children);
-        children.forEach(child => child.remove());
-
-        for (let m = 0; m < numberOfMachineTypes; m++) {
-            const changeoversTimeWrapper = document.createElement('div');
-
-            //! Machine type label
-            const label = document.createElement('p');
-            label.textContent = "Machine type " + (m + 1) + ":";
-            changeoversTimeWrapper.appendChild(label);
-
-            //! Vertical label column
-            const fieldDiv = document.createElement('div');
-            fieldDiv.className = "titleColumn";
-
-            const p = document.createElement('p');
-            p.textContent = `.`;
-            fieldDiv.appendChild(p);
-
-            for (let j = 0; j < jobs; j++) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = `J${j+1}`;
-                input.disabled = true;
-                fieldDiv.appendChild(input);
-            }
-            changeoversTimeWrapper.appendChild(fieldDiv);
-
-            //! Dynamic content columns
-            for (let i = 0; i < jobs; i++) {
-                const fieldDiv = document.createElement('div');
-
-                const p = document.createElement('p');
-                p.textContent = `J${i+1}`;
-                fieldDiv.appendChild(p);
-
-                for (let j = 0; j < jobs; j++) {
-                    const input = document.createElement('input');
-                    input.type = 'number';
-                    input.value = 0;
-
-                    if (i == j) {
-                        input.disabled = true;
-                        input.className = "disabled";
-                    }
-
-                    //! Input validation
-                    allowOnlyPositiveDecimals(input);
-
-                    input.addEventListener("change", () => {
-                        solutionToUpdate = true;
-
-                        let value = parseInt(input.value);
-                        if (value < 0 || input.value == "") {
-                            value = 0;
-                            input.value = value;
-                        } else if (value > 1000) {
-                            value = 1000;
-                            input.value = value;
-                        }
-
-                        value = parseInt(value);
-                        input.value = value;
-                    });
-
-                    fieldDiv.appendChild(input);
-                }
-
-                changeoversTimeWrapper.appendChild(fieldDiv);
-            }
-
-            constraintsChangeoversTimesWrapper.appendChild(changeoversTimeWrapper);
-        }
-    }
-
-    //! Changeovers cost update handler
-    function updateChangeoversCost(number) {
-        const children = Array.from(constraintsChangeoverCostsWrapper.children);
-        children.forEach(child => child.remove());
-
-        for (let i = 0; i < number; i++) {
-            const fieldDiv = document.createElement('div');
-
-            const p = document.createElement('p');
-            p.textContent = `M${i+1}`;
-
-            const input = document.createElement('input');
-            input.type = 'number';
-            input.value = 0;
-
-            //! Input validation
-            allowOnlyPositiveDecimals(input);
-
-            input.addEventListener("change", () => {
-                solutionToUpdate = true;
-
-                let value = parseInt(input.value);
-                if (value < 0 || input.value == "") {
-                    value = 0;
-                    input.value = value;
-                } else if (value > 1000) {
-                    value = 1000;
-                    input.value = value;
-                }
-
-                value = parseInt(value);
-                input.value = value;
-            });
-
-            fieldDiv.appendChild(p);
-            fieldDiv.appendChild(input);
-
-            constraintsChangeoverCostsWrapper.appendChild(fieldDiv);
-        }
-    }
-
-
-
     //* SOLUTION VIEW -------------------------------------------------------------------------------------
 
     //! Solution calculation handler
@@ -901,49 +879,46 @@ window.onload = () => {
         generateChangeovers();
         generateTransports();
 
-        solutionConflicts.querySelectorAll('p').forEach(p => p.remove());
-        solutionChangeovers.querySelectorAll('p').forEach(p => p.remove());
-        //solutioTransports.querySelectorAll('p').forEach(p => p.remove());
-
         //! Infinite loop prevention bound
         let safetyBound = (jobs.reduce((total, obj) => {
             const operationsSum = obj.operationsTimes.reduce((sum, time) => sum + time, 0);
             return total + operationsSum;
         }, 0)) * 2;
 
+        let currenTimeQueue = Array.from({
+            length: numberOfMachineTypes
+        }, () => []);
         let waitingQueue = Array.from({
             length: numberOfMachineTypes
         }, () => []);
 
         for (let i = 0; i < safetyBound; i++) {
 
-            //! Check if any job became available
-            const selectedJobs = jobs.filter(obj => obj.availability == i).map(obj => obj);
+            //! Check if any job arrived
+            let jobsNotArrived = numberOfJobs;
+            if (jobsNotArrived > 0) {
+                const arrivedJobs = jobs.filter(obj => obj.arrival === i).map(obj => obj);
 
-            if (selectedJobs.length >= 1) {
-                selectedJobs.forEach(j => {
-                    if ((j.routing[j.operation] - 1) >= 0) { //! Check if routing is not over
-                        waitingQueue[(j.routing[j.operation] - 1)].push(j);
-                    }
-                });
+                if (arrivedJobs.length >= 1) {
+                    jobsNotArrived -= arrivedJobs.length;
+                    arrivedJobs.forEach(j => {
+                        if ((j.routing[j.operation] - 1) >= 0) {
+                            waitingQueue[(j.routing[j.operation] - 1)].push(j);
+                        }
+                    });
+                }
             }
 
-
+            //! Check if any machine is avaiable
             for (let m = 0; m < numberOfMachineTypes; m++) {
-                if (waitingQueue[m].length > 0) { //! Check if any job is waiting for machine
-                    const waitingQueueSize = waitingQueue[m].length;
+                if (waitingQueue[m].length > 0) {
+                    const matchingMachines = machines.filter(machine => machine.type === (m + 1));
+                    const selectedMachines = matchingMachines.filter(machine => machine.availability <= i);
 
-                    for (let z = 0; z < waitingQueueSize; z++) {
-                        const matchingMachines = machines.filter(machine => machine.type === (m + 1));
-                        const selectedMachines = matchingMachines.filter(machine => machine.availability <= i);
-
-                        if (selectedMachines.length >= 1) {
-                            if (waitingQueue[m].length > 1) {
-                                addConflict(waitingQueue[m], (m + 1), i);
-                            }
-
-                            assignJob(solveConflict(waitingQueue[m]), selectMachine(selectedMachines), i);
-                        }
+                    if (selectedMachines.length == 1) {
+                        assignJob(solveConflict(waitingQueue[m]), selectedMachines[0], i);
+                    } else if (selectedMachines.length > 1) {
+                        console.log("wiecej");
                     }
                 }
             }
@@ -957,291 +932,47 @@ window.onload = () => {
                 case "LIFO":
                     return solveLIFO(jobs);
                     break;
-                case "SPT":
-                    return solveSPT(jobs);
-                    break;
-                case "LPT":
-                    return solveLPT(jobs);
-                    break;
-                case "EDD":
-                    return solveEDD(jobs);
-                    break;
-                case "LWR":
-                    return solveLWR(jobs);
-                    break;
             }
 
 
             //! FIFO rule conflict solution handler
             function solveFIFO(jobs) {
-                let solution = jobs[0];
-                jobs.shift();
-                return solution;
+                return jobs[0];
             }
 
             //! LIFO rule conflict solution handler
             function solveLIFO(jobs) {
-                let solution = jobs[jobs.length - 1];
-                jobs.pop();
-                return solution;
+                return jobs[jobs.length - 1];
             }
-
-            //! SPT rule conflict solution handler
-            function solveSPT(jobs) {
-                let minIndex = 0;
-                let minValue = jobs[0].operationsTimes[jobs[0].operation];
-
-                for (let i = 1; i < jobs.length; i++) {
-                    const currentValue = jobs[i].operationsTimes[jobs[i].operation];
-
-                    if (
-                        currentValue < minValue ||
-                        (currentValue === minValue && jobs[i].ID < jobs[minIndex].ID)
-                    ) {
-                        minValue = currentValue;
-                        minIndex = i;
-                    }
-                }
-
-
-                let solution = jobs[minIndex];
-                jobs.splice(minIndex, 1);
-                return solution;
-            }
-
-            //! LPT rule conflict solution handler
-            function solveLPT(jobs) {
-                let maxIndex = 0;
-                let maxValue = jobs[0].operationsTimes[jobs[0].operation];
-
-                for (let i = 1; i < jobs.length; i++) {
-                    const currentValue = jobs[i].operationsTimes[jobs[i].operation];
-
-                    if (
-                        currentValue > maxValue ||
-                        (currentValue == maxValue && jobs[i].ID < jobs[maxIndex].ID)
-                    ) {
-                        maxValue = currentValue;
-                        maxIndex = i;
-                    }
-                }
-
-                let solution = jobs[maxIndex];
-                jobs.splice(maxIndex, 1);
-                return solution;
-            }
-
-            //! LWR rule conflict solution handler
-            function solveEDD(jobs) {
-                let minIndex = 0;
-                let minSum = Infinity;
-
-                for (let i = 0; i < jobs.length; i++) {
-                    const totalOperationsTime = jobs[i].operationsTimes.reduce((sum, time) => sum + time, 0);
-                    const currentSum = totalOperationsTime + jobs[i].arrival;
-
-                    if (currentSum < minSum || (currentSum === minSum && jobs[i].ID < jobs[minIndex].ID)) {
-                        minSum = currentSum;
-                        minIndex = i;
-                    }
-                }
-
-                let solution = jobs[minIndex];
-                jobs.splice(minIndex, 1);
-                return solution;
-            }
-
-            //! LWR rule conflict solution handler
-            function solveLWR(jobs) {
-                let minIndex = 0;
-                let minSum = Infinity;
-
-                for (let i = 0; i < jobs.length; i++) {
-                    const startIndex = jobs[i].operation;
-
-                    const totalOperationsTime = jobs[i].operationsTimes
-                        .slice(startIndex)
-                        .reduce((sum, time) => sum + time, 0);
-
-
-                    if (totalOperationsTime < minSum || (totalOperationsTime === minSum && jobs[i].ID < jobs[minIndex].ID)) {
-                        minSum = totalOperationsTime;
-                        minIndex = i;
-                    }
-                }
-
-                let solution = jobs[minIndex];
-                jobs.splice(minIndex, 1);
-                return solution;
-            }
-
-        }
-
-        function selectMachine(machineGroup) {
-            machineGroup.sort((a, b) => {
-                if (b.efficiency !== a.efficiency) {
-                    return b.efficiency - a.efficiency;
-                } else {
-                    return a.ID - b.ID;
-                }
-            });
-
-            return machineGroup[0];
-        }
-
-        function addConflict(jobs, machine, timestamp) {
-            const p = document.createElement('p');
-
-            let jobsIDs = "";
-            jobs.forEach((e, i) => {
-                if (i < (jobs.length - 1)) {
-                    jobsIDs += e.ID + " | ";
-                } else {
-                    jobsIDs += e.ID;
-                }
-            });
-
-            const operationsSpan = document.createElement('span');
-            operationsSpan.textContent = `Operations: ${jobsIDs}`;
-
-            const conflictTimeSpan = document.createElement('span');
-            conflictTimeSpan.textContent = `Conflict Time: ${timestamp}`;
-
-            const conflictMachineSpan = document.createElement('span');
-            conflictMachineSpan.textContent = `Machine type: ${machine}`;
-
-            p.appendChild(operationsSpan);
-            p.appendChild(conflictTimeSpan);
-            p.appendChild(conflictMachineSpan);
-
-            solutionConflicts.appendChild(p);
-        }
-
-        function addChangeover(jobs, machine, timestamp, requiredTime) {
-            const p = document.createElement('p');
-
-            let time = "";
-            timestamp.forEach((e, i) => {
-                if (i < (timestamp.length - 1)) {
-                    time += e + " - ";
-                } else {
-                    time += e;
-                }
-            });
-
-            const machineSpan = document.createElement('span');
-            machineSpan.textContent = `Machine: ${machine.ID}`;
-
-            const operationSpan = document.createElement('span');
-            operationSpan.textContent = `Operation: ${jobs.ID}`;
-
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = `Time: ${time}`;
-
-            p.appendChild(machineSpan);
-            p.appendChild(operationSpan);
-            p.appendChild(timeSpan);
-
-            solutionChangeovers.appendChild(p);
-
-            changeovers.totalCost += (changeovers.cost[machine.type - 1] * requiredTime);
-
-            let lineupEntry = {
-                x: [timestamp[0], timestamp[1]],
-                y: "M" + machine.ID
-            }
-            machine.changeovers.push(lineupEntry);
-            machine.changeoversLabels.push(jobs.ID + "." + (jobs.operation + 1));
-        }
-
-        function sortChangeovers() {
-            const paragraphs = Array.from(solutionChangeovers.querySelectorAll('p'));
-
-            paragraphs.sort((a, b) => {
-                const timeA = parseInt(a.querySelector('span:nth-child(3)').textContent.match(/(\d+)\s*-\s*\d+/)[1], 10);
-                const timeB = parseInt(b.querySelector('span:nth-child(3)').textContent.match(/(\d+)\s*-\s*\d+/)[1], 10);
-                return timeA - timeB;
-            });
-
-            solutionChangeovers.querySelectorAll('p').forEach(p => p.remove());
-            paragraphs.forEach(p => solutionChangeovers.appendChild(p));
-        }
-
-        function addTransport(jobs, transport, timestamp) {
-            const p = document.createElement('p');
-
-            let time = "";
-            timestamp.forEach((e, i) => {
-                if (i < (timestamp.length - 1)) {
-                    time += e + " - ";
-                } else {
-                    time += e;
-                }
-            });
-
-            const machineSpan = document.createElement('span');
-            machineSpan.textContent = `Transport Resource: ${transport}`;
-
-            const operationSpan = document.createElement('span');
-            operationSpan.textContent = `Operation: ${jobs.ID}`;
-
-            const timeSpan = document.createElement('span');
-            timeSpan.textContent = `Time: ${time}`;
-
-
-
-            p.appendChild(machineSpan);
-            p.appendChild(operationSpan);
-            p.appendChild(timeSpan);
-
-            solutioTransports.appendChild(p);
         }
 
         function assignJob(job, machine, timestamp) {
-
-            if (machine.lineup.length == 0) {
-                assignJobToMachine(job, machine, timestamp, 0);
+            if (machine.lineup.length == 0 && job.operation == 0) {
+                assignJobToMachine(job, machine, timestamp);
             } else {
-                let changeoverTime = 0;
-                if (changeovers.state == 1) {
-                    changeoverTime = changeovers.times[machine.type - 1][machine.jobs[machine.jobs.length - 1] - 1][job.ID - 1];
-
-                    if (machine.availability < timestamp) {
-                        addChangeover(job, machine, [machine.availability, (machine.availability + changeoverTime)], changeoverTime);
-                        changeoverTime = Math.max(0, changeoverTime - (timestamp - machine.availability));
-                    } else {
-                        addChangeover(job, machine, [timestamp, (timestamp + changeoverTime)], changeoverTime);
+                if (transports.state == "OFF") {
+                    if (changeovers.state == "OFF") {
+                        assignJobToMachine(job, machine, timestamp);
                     }
-
-                }
-
-                if (transports.state == 0) {
-                    assignJobToMachine(job, machine, timestamp, changeoverTime);
                 }
 
             }
 
-            function assignJobToMachine(job, machine, timestamp, changeoverTime) {
+            function assignJobToMachine(job, machine, timestamp) {
                 let lineupEntry = {
-                    x: [changeoverTime + timestamp, changeoverTime + timestamp + (job.operationsTimes[job.operation] + Math.ceil(job.operationsTimes[job.operation] * (1 - machine.efficiency)))],
+                    x: [timestamp, timestamp + job.operationsTimes[job.operation]],
                     y: "M" + machine.ID
                 }
                 machine.lineup.push(lineupEntry);
                 machine.lineupLabels.push(job.ID + "." + (job.operation + 1));
-                machine.availability = changeoverTime + timestamp + (job.operationsTimes[job.operation] + Math.ceil(job.operationsTimes[job.operation] * (1 - machine.efficiency)));
+                machine.availability = timestamp + job.operationsTimes[job.operation];
 
-                machine.jobs.push(job.ID);
-
-                job.availability = changeoverTime + timestamp + (job.operationsTimes[job.operation] + Math.ceil(job.operationsTimes[job.operation] * (1 - machine.efficiency)));
                 job.operation++;
             }
 
         }
 
         generateGanttChart();
-        sortChangeovers();
-
-        generateEvaluation();
     }
 
 
@@ -1265,12 +996,7 @@ window.onload = () => {
                 efficiency: efficiency,
                 availability: 0,
                 lineup: [],
-                lineupLabels: [],
-                jobs: [],
-                changeovers: [],
-                changeoversLabels: [],
-                transport: [],
-                transportLabels: []
+                lineupLabels: []
             };
         }
     }
@@ -1305,7 +1031,7 @@ window.onload = () => {
                 operationsTimes: operationsTimes,
                 routing: routing,
                 operation: 0,
-                availability: arrival
+                availability: 0
             };
         }
     }
@@ -1316,38 +1042,29 @@ window.onload = () => {
         let state = constraintsChangeoversButton.innerText == "OFF" ? 0 : 1;
 
         let times = [];
+        let timeColumns = constraintsChangeoversTimesWrapper.querySelectorAll("div:not(.titleColumn)");
+        for (let i = 0; i < numberOfJobs; i++) {
+            let row = [];
 
-        const changeoversTimes = Array.from(constraintsChangeoversTimesWrapper.children);
-        changeoversTimes.forEach(e => {
-            let tmpTimes = []
-            let timeColumns = e.querySelectorAll("div:not(.titleColumn)");
-
-            for (let i = 0; i < timeColumns.length; i++) {
-                let row = [];
-
-                for (let j = 0; j < timeColumns.length; j++) {
-                    row.push(parseInt(timeColumns[j].querySelector(`input:nth-of-type(${i+1})`).value));
-                }
-
-                tmpTimes.push(row);
+            for (let j = 0; j < numberOfJobs; j++) {
+                row.push(parseInt(timeColumns[j].querySelector(`input:nth-of-type(${i+1})`).value));
             }
 
-            times.push(tmpTimes);
-        });
+            times.push(row);
+        }
 
         let costs = [];
         constraintsChangeoverCostsWrapper.querySelectorAll("input").forEach(e => {
             costs.push(parseInt(e.value));
         });
 
-        changeovers = createChangeoverObject(state, times, costs);
+        changeovers = createChangeoverObject(state, times, costs)
 
         function createChangeoverObject(state, times, cost) {
             return {
                 state: state,
                 times: times,
-                cost: cost,
-                totalCost: 0
+                cost: cost
             };
         }
     }
@@ -1394,97 +1111,59 @@ window.onload = () => {
             datasets: []
         };
 
-        function createConfig() {
-            return {
-                type: 'bar',
-                data: {
-                    labels: [...labels], // Kopia etykiet
-                    datasets: [] // Puste dane dla każdego wykresu
-                },
-                options: {
-                    indexAxis: 'y',
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            stacked: true,
-                            grid: {
-                                display: false
-                            }
-                        }
-                    },
-                    plugins: {
-                        datalabels: {
-                            anchor: 'center',
-                            align: 'center',
-                            font: {
-                                weight: 'bold',
-                                size: 14
-                            },
-                            formatter: (value, context) => {
-                                return context.chart.data.datasets[context.datasetIndex].label;
-                            }
-                        },
-                        legend: {
+        // config 
+        const config = {
+            type: 'bar',
+            data,
+            options: {
+                indexAxis: 'y',
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        stacked: true,
+                        grid: {
                             display: false
                         }
                     }
                 },
-                plugins: [ChartDataLabels]
-            };
+                plugins: {
+                    datalabels: {
+                        anchor: 'center',
+                        align: 'center',
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        },
+                        formatter: (value, context) => {
+                            return context.chart.data.datasets[context.datasetIndex].label;
+                        }
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        // render init block
+        if (ganttChart) {
+            ganttChart.destroy();
         }
-
-        let jobsColors = [];
-        for (let i = 0; i < jobs.length; i++) {
-            jobsColors.push(randomColorGenerator());
-        }
-
-
-        if (ganttCharts.length > 0) {
-            ganttCharts.forEach(e => {
-                e.destroy();
-            });
-        }
-
-        ganttCharts[0] = new Chart(
+        ganttChart = new Chart(
             document.querySelector('#solution_GanttChart'),
-            createConfig()
+            config
         );
 
         machines.forEach(e => {
-            e.lineupLabels.forEach((l, i) => {
-                let jobID = l.split(".");
-                addData(ganttCharts[0], l, e.lineup[i], jobsColors[jobID[0]]);
-            });
+            addData(ganttChart, e.lineupLabels, e.lineup, randomColorGenerator());
         });
-
-        if (changeovers.state == 1) {
-            ganttCharts[1] = new Chart(
-                document.querySelector('#solution_ChangeoversGanttChart'),
-                createConfig()
-            );
-
-            datasetLabels.length = 0;
-
-            machines.forEach(e => {
-                e.changeoversLabels.forEach((l, i) => {
-                    let jobID = l.split(".");
-                    addData(ganttCharts[1], l, e.changeovers[i], jobsColors[jobID[0]]);
-                });
-            });
-        }
-
-        if (transports.state == 1) {
-            ganttCharts[2] = new Chart(
-                document.querySelector('#solution_TransportGanttChart'),
-                createConfig()
-            );
-        }
 
         function addData(chart, label, data, color) {
             const newData = {
                 label: label,
-                data: [data],
+                data: data,
                 backgroundColor: color
             }
 
@@ -1504,92 +1183,6 @@ window.onload = () => {
 
             return randomColor;
         }
-    }
-
-
-    //* SCHEDULE EVALUATION -------------------------------------------------------------------------------------
-    function generateEvaluation() {
-
-        //! Deadlines for completion of all jobs
-        document.querySelector("#qualityIndicators_Deadlines input").value = Math.max(...jobs.map(job => job.availability));
-
-        const totalAvailability = jobs.reduce((sum, job) => sum + job.availability, 0);
-        document.querySelector("#qualityIndicators_SumOfDeadlines input").value = totalAvailability;
-
-        const avgDedline = totalAvailability / jobs.length;
-        document.querySelector("#qualityIndicators_AvarageDeadline input").value = Math.round((avgDedline + Number.EPSILON) * 100) / 100;
-
-
-        //! Delays in job completion
-        const differences = jobs.map(job => job.availability - job.requiredComplition);
-        document.querySelector("#qualityIndicators_MaxComplitionDelay input").value = Math.max(...differences);
-
-        const sumOfDifferences = differences.reduce((sum, diff) => sum + diff, 0);
-        document.querySelector("#qualityIndicators_SumOfComplitionDelays input").value = sumOfDifferences;
-
-        const avgComplitionDelay = sumOfDifferences / differences.length;
-        document.querySelector("#qualityIndicators_AvarageComplitionDelay input").value = Math.round((avgComplitionDelay + Number.EPSILON) * 100) / 100;
-
-
-        //! Job delays
-        const differences2 = jobs.map(job => {
-            const difference = job.availability - job.requiredComplition;
-            return difference > 0 ? difference : 0;
-        });
-        document.querySelector("#qualityIndicators_MaxDelay input").value = Math.max(...differences2);
-
-        const sumOfDifferences2 = differences2.reduce((sum, diff) => sum + diff, 0);
-        document.querySelector("#qualityIndicators_SumOfDelays input").value = sumOfDifferences2;
-
-        const avgDelays = sumOfDifferences2 / differences2.length;
-        document.querySelector("#qualityIndicators_AvarageDelay input").value = Math.round((avgDelays + Number.EPSILON) * 100) / 100;
-
-
-        //! Job flow times
-        const flowtime = jobs.map(job => job.availability - job.arrival);
-        document.querySelector("#qualityIndicators_MaxFlowTume input").value = Math.max(...flowtime);
-
-        const sumOfFlowtimes = flowtime.reduce((sum, diff) => sum + diff, 0);
-        document.querySelector("#qualityIndicators_SumOfFlowTimes input").value = sumOfFlowtimes;
-
-        const avgFlowtime = sumOfFlowtimes / flowtime.length;
-        document.querySelector("#qualityIndicators_AvarageFlowTime input").value = Math.round((avgFlowtime + Number.EPSILON) * 100) / 100;
-
-
-        //! Job waiting times
-        const totalOperationsTimes = jobs.map(job => {
-            return job.operationsTimes.reduce((sum, time) => sum + time, 0);
-        });
-        const waitingTime = jobs.map((job, index) => {
-            return flowtime[index] - totalOperationsTimes[index];
-        });
-        document.querySelector("#qualityIndicators_MaxWaitingTime input").value = Math.max(...waitingTime);
-
-        const sumOfWaitingTime = waitingTime.reduce((sum, diff) => sum + diff, 0);
-        document.querySelector("#qualityIndicators_SumOfWaitingTimes input").value = sumOfWaitingTime;
-
-        const avgWaitingTime = sumOfWaitingTime / waitingTime.length;
-        document.querySelector("#qualityIndicators_AvarageWaitingTime input").value = Math.round((avgWaitingTime + Number.EPSILON) * 100) / 100;
-
-
-        //! Downtime of all machines
-        let idleTime = 0;
-        machines.forEach(e => {
-            const totalDifference = e.lineup.reduce((sum, item) => {
-                const [start, end] = item.x;
-                return sum + (end - start);
-            }, 0);
-
-            idleTime += e.availability - totalDifference;
-        });
-        document.querySelector("#qualityIndicators_IdleTime input").value = idleTime;
-
-        document.querySelector("#qualityIndicators_ChangeoversCost input").value = changeovers.totalCost;
-        /*if (changeovers.state == 1) {
-            document.querySelector("#qualityIndicators_ChangeoversCost input").value = changeovers.totalCost;
-        } else {
-            document.querySelector("#qualityIndicators_ChangeoversCost input").value = "0";
-        }*/
     }
 
 
@@ -1660,6 +1253,24 @@ window.onload = () => {
 
 
         //! Constraints
+        if (importedData.changeoversState == "ON") {
+            constraintsChangeoversButton.innerText = "OFF";
+        } else {
+            constraintsChangeoversButton.innerText = "ON";
+        }
+        changeoversStateSwitch(constraintsChangeoversButton);
+
+        const inputChangeoversTimes = constraintsChangeoversTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
+        for (let i = 0; i < inputChangeoversTimes.length; i++) {
+            inputChangeoversTimes[i].value = importedData.changeoversTimes[i];
+        }
+
+        const inputChangeoversCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input");
+        for (let i = 0; i < inputChangeoversCosts.length; i++) {
+            inputChangeoversCosts[i].value = importedData.changeoversCosts[i];
+        }
+
+
         if (importedData.transportState == "ON") {
             constraintsTransportButton.innerText = "OFF";
         } else {
@@ -1670,49 +1281,9 @@ window.onload = () => {
         constraintsTransportResources.value = importedData.transportResources;
 
         const inputTransportTimes = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
-        const size = Math.sqrt(inputTransportTimes.length);
-
         for (let i = 0; i < inputTransportTimes.length; i++) {
-            const row = Math.floor(i / size);
-            const column = i % size;
-
-            if (row != column) {
-                inputTransportTimes[i].value = importedData.transportTimes[i];
-            } else {
-                inputTransportTimes[i].value = 0;
-            }
+            inputTransportTimes[i].value = importedData.transportTimes[i];
         }
-
-
-        if (importedData.changeoversState == "ON") {
-            constraintsChangeoversButton.innerText = "OFF";
-        } else {
-            constraintsChangeoversButton.innerText = "ON";
-        }
-        changeoversStateSwitch(constraintsChangeoversButton);
-
-        const changeoversTimes = Array.from(constraintsChangeoversTimesWrapper.children);
-        changeoversTimes.forEach((e, num) => {
-            const inputChangeoversTimes = e.querySelectorAll("div:not(.titleColumn) > input");
-            const size = Math.sqrt(inputChangeoversTimes.length);
-
-            for (let i = 0; i < inputChangeoversTimes.length; i++) {
-                const row = Math.floor(i / size);
-                const column = i % size;
-
-                if (row != column) {
-                    inputChangeoversTimes[i].value = importedData.changeoversTimes[num][i];
-                } else {
-                    inputChangeoversTimes[i].value = 0;
-                }
-            }
-        });
-
-        const inputChangeoversCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input");
-        for (let i = 0; i < inputChangeoversCosts.length; i++) {
-            inputChangeoversCosts[i].value = importedData.changeoversCosts[i];
-        }
-
     }
 
 
@@ -1778,33 +1349,25 @@ window.onload = () => {
 
 
         //! Constraints
+        exportedData.changeoversState = constraintsChangeoversButton.innerText;
+
+        const inputChangeoversTimes = constraintsChangeoversTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
+        for (let i = 0; i < inputChangeoversTimes.length; i++) {
+            exportedData.changeoversTimes.push(inputChangeoversTimes[i].value);
+        }
+
+        const inputChangeoversCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input");
+        for (let i = 0; i < inputChangeoversCosts.length; i++) {
+            exportedData.changeoversCosts.push(inputChangeoversCosts[i].value);
+        }
+
+
         exportedData.transportState = constraintsTransportButton.innerText;
         exportedData.transportResources = constraintsTransportResources.value;
 
         const inputTransportTimes = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
         for (let i = 0; i < inputTransportTimes.length; i++) {
             exportedData.transportTimes.push(inputTransportTimes[i].value);
-        }
-
-
-        exportedData.changeoversState = constraintsChangeoversButton.innerText;
-
-        const changeoversTimes = Array.from(constraintsChangeoversTimesWrapper.children);
-        changeoversTimes.forEach(e => {
-            let tmpexportedData = [];
-            const inputChangeoversTimes = e.querySelectorAll("div:not(.titleColumn) > input");
-
-            for (let i = 0; i < inputChangeoversTimes.length; i++) {
-                tmpexportedData.push(inputChangeoversTimes[i].value);
-            }
-
-            exportedData.changeoversTimes.push(tmpexportedData);
-        });
-
-
-        const inputChangeoversCosts = constraintsChangeoverCostsWrapper.querySelectorAll("input");
-        for (let i = 0; i < inputChangeoversCosts.length; i++) {
-            exportedData.changeoversCosts.push(inputChangeoversCosts[i].value);
         }
 
         exportTextarea.value = JSON.stringify(exportedData);

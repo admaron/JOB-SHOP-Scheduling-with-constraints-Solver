@@ -72,10 +72,50 @@
     </nav>
 
     <main>
+        <section id="importExport">
+            <header>
+                <h1>Import / Export<span>.</span></h1>
+                <button class="backToData">BACK TO PROBLEM</button>
+            </header>
+
+            <div id="importExport_import">
+                <div>
+                    <h2>Import problem data:</h2>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sapien ex, vulputate vel
+                        hendrerit
+                        ac, tempus interdum lectus. Maecenas vel gravida nulla. Sed id viverra lorem. Duis gravida quam
+                        urna, ac tristique mauris tristique nec. Morbi efficitur consequat feugiat. Nulla nisi nibh,
+                        accumsan quis purus a, convallis faucibus massa.
+                    </p>
+                    <button id="importBTN">IMPORT DATA</button>
+                </div>
+
+                <textarea></textarea>
+
+            </div>
+
+            <div id="importExport_export">
+                <div>
+                    <h2>Export problem data:</h2>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris sapien ex, vulputate vel
+                        hendrerit
+                        ac, tempus interdum lectus. Maecenas vel gravida nulla. Sed id viverra lorem. Duis gravida quam
+                        urna, ac tristique mauris tristique nec. Morbi efficitur consequat feugiat. Nulla nisi nibh,
+                        accumsan quis purus a, convallis faucibus massa.
+                    </p>
+                    <button id="exportBTN">EXPORT DATA</button>
+                </div>
+
+                <textarea></textarea>
+
+            </div>
+
+        </section>
+
         <section id="systemParams" class="active">
             <header>
                 <h1>System parameters<span>.</span></h1>
-                <button class="dataBTN">IMPORT / EXPORT</button>
+                <button class="import-export">IMPORT / EXPORT</button>
             </header>
 
             <div id="systemParams_numberOfMachineTypes">
@@ -88,74 +128,21 @@
             <div>
                 <h2>Number of machines of a given type:</h2>
 
-                <div id="systemParams_numberOfMachinesOfGivenType">
-                    <div class="field">
-                        <p>Type 1 machines (M1):</p>
-                        <input type="number">
-                    </div>
-                    <div class="field">
-                        <p>Type 2 machines (M2):</p>
-                        <input type="number">
-                    </div>
-                    <div class="field">
-                        <p>Type 3 machines (M3):</p>
-                        <input type="number">
-                    </div>
-                    <div class="field">
-                        <p>Type 4 machines (M4):</p>
-                        <input type="number">
-                    </div>
-                    <div class="field">
-                        <p>Type 5 machines (M5):</p>
-                        <input type="number">
-                    </div>
-                </div>
+                <div id="systemParams_numberOfMachinesOfGivenType"></div>
+
             </div>
 
             <div>
                 <h2>Efficiency coefficient for individual machines of a given type:</h2>
 
-                <div id="systemParams_efficiencyCoefficient">
-                    <div class="field stacked">
-                        <p>Type 1 (M1):</p>
-                        <div>
-                            <input type="number">
-                            <p>M1.1</p>
-                        </div>
-                        <div>
-                            <input type="number">
-                            <p>M1.2</p>
-                        </div>
-                        <div>
-                            <input type="number">
-                            <p>M1.3</p>
-                        </div>
-                    </div>
-
-                    <div class="field stacked">
-                        <p>Type 2 (M2):</p>
-                        <div>
-                            <input type="number">
-                            <p>M2.1</p>
-                        </div>
-                    </div>
-
-                    <div class="field stacked">
-                        <p>Type 3 (M3):</p>
-                        <div>
-                            <input type="number">
-                            <p>M3.1</p>
-                        </div>
-                    </div>
-
-                </div>
+                <div id="systemParams_efficiencyCoefficient"></div>
             </div>
         </section>
 
         <section id="problemParams">
             <header>
                 <h1>Problem parameters<span>.</span></h1>
-                <button class="dataBTN">IMPORT / EXPORT</button>
+                <button class="import-export">IMPORT / EXPORT</button>
             </header>
 
             <div id="problemParams_problemBasicData">
@@ -183,148 +170,24 @@
             <div>
                 <div>
                     <h2>Jobs arrival times:</h2>
-                    <div class="field stacked" id="problemParams_JobsArrivalTimes">
-                        <div>
-                            <p>J1</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J2</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J3</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J4</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J5</p>
-                            <input type="number">
-                        </div>
-                    </div>
+                    <div class="field stacked" id="problemParams_JobsArrivalTimes"></div>
                 </div>
 
                 <div>
                     <h2>Required jobs completion times:</h2>
-                    <div class="field stacked" id="problemParams_JobsCompletionTimes">
-                        <div>
-                            <p>J1</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J2</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J3</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J4</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J5</p>
-                            <input type="number">
-                        </div>
-                    </div>
+                    <div class="field stacked" id="problemParams_JobsCompletionTimes"></div>
                 </div>
             </div>
 
             <div>
                 <div>
                     <h2>Operations processing times:</h2>
-                    <div class="field stacked" id="problemParams_ProcessingTimes">
-                        <div>
-                            <p>O1</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O2</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O3</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O4</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O5</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                    </div>
+                    <div class="field stacked" id="problemParams_ProcessingTimes"></div>
                 </div>
 
                 <div>
                     <h2>Jobs routing:</h2>
-                    <div class="field stacked" id="problemParams_JobsRouting">
-                        <div>
-                            <p>O1</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O2</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O3</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O4</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>O5</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                    </div>
+                    <div class="field stacked" id="problemParams_JobsRouting"></div>
                 </div>
             </div>
 
@@ -333,87 +196,8 @@
         <section id="constraints">
             <header>
                 <h1>Constraints<span>.</span></h1>
-                <button class="dataBTN">IMPORT / EXPORT</button>
+                <button class="import-export">IMPORT / EXPORT</button>
             </header>
-
-            <div id="constraints_ChangeoversWrapper">
-                <div id="constraints_Changeovers" class="field">
-                    <p>Changeovers:</p>
-                    <div class="constraintsSwitch">ON</div>
-                </div>
-
-                <div>
-                    <h2>Changeovers times:</h2>
-                    <div class="field stacked" id="constraints_ChangeoverTimes">
-                        <div>
-                            <p>M1</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M2</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M3</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M4</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M5</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <h2>Changeovers cost:</h2>
-                    <div class="field stacked" id="constraints_ChangeoverCosts">
-                        <div>
-                            <p>J1</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J2</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J3</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J4</p>
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>J5</p>
-                            <input type="number">
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <div id="constraints_TransportWrapper">
                 <div id="constraints_Transport" class="field">
@@ -428,49 +212,27 @@
 
                 <div>
                     <h2>Transport times between machines:</h2>
-                    <div class="field stacked" id="constraints_TransportTimes">
-                        <div>
-                            <p>M1</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M2</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M3</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M4</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                        <div>
-                            <p>M5</p>
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                            <input type="number">
-                        </div>
-                    </div>
+                    <div class="field stacked" id="constraints_TransportTimes"></div>
                 </div>
+            </div>
+
+            <div id="constraints_ChangeoversWrapper">
+                <div id="constraints_Changeovers" class="field">
+                    <p>Changeovers:</p>
+                    <div class="constraintsSwitch">ON</div>
+                </div>
+
+                <div>
+                    <h2>Changeovers cost:</h2>
+                    <div class="field stacked" id="constraints_ChangeoverCosts"></div>
+                </div>
+
+                <div>
+                    <h2>Changeovers times:</h2>
+                    <div class="field stacked" id="constraints_ChangeoverTimes"></div>
+                </div>
+
+
             </div>
 
         </section>
@@ -485,13 +247,6 @@
 
                 <div id="solution_Conflicts" class="field">
                     <h2>Conflict analysis:</h2>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
-                    <p><span>Operations: 1 | 3</span><span>Conflict Time: 25</span><span>Conflict Machine: 2</span></p>
                 </div>
             </div>
 
@@ -558,17 +313,17 @@
             <div>
                 <h2>Delays in job completion:</h2>
                 <div>
-                    <div id="qualityIndicators_Deadlines" class="field">
+                    <div id="qualityIndicators_MaxComplitionDelay" class="field">
                         <p>Maximum delay in job completion:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_SumOfDeadlines" class="field">
+                    <div id="qualityIndicators_SumOfComplitionDelays" class="field">
                         <p>Total delays in job completion:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_AvarageDeadline" class="field">
+                    <div id="qualityIndicators_AvarageComplitionDelay" class="field">
                         <p>Average delay in job completion:</p>
                         <input type="number" disabled value="100">
                     </div>
@@ -578,17 +333,17 @@
             <div>
                 <h2>Job delays:</h2>
                 <div>
-                    <div id="qualityIndicators_Deadlines" class="field">
+                    <div id="qualityIndicators_MaxDelay" class="field">
                         <p>Maximum job delay:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_SumOfDeadlines" class="field">
+                    <div id="qualityIndicators_SumOfDelays" class="field">
                         <p>Total job delays:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_AvarageDeadline" class="field">
+                    <div id="qualityIndicators_AvarageDelay" class="field">
                         <p>Average job delay:</p>
                         <input type="number" disabled value="100">
                     </div>
@@ -598,17 +353,17 @@
             <div>
                 <h2>Job flow times:</h2>
                 <div>
-                    <div id="qualityIndicators_Deadlines" class="field">
+                    <div id="qualityIndicators_MaxFlowTume" class="field">
                         <p>Maximum job flow time:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_SumOfDeadlines" class="field">
+                    <div id="qualityIndicators_SumOfFlowTimes" class="field">
                         <p>Total job flow times:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_AvarageDeadline" class="field">
+                    <div id="qualityIndicators_AvarageFlowTime" class="field">
                         <p>Average job flow time:</p>
                         <input type="number" disabled value="100">
                     </div>
@@ -618,17 +373,17 @@
             <div>
                 <h2>Job waiting times:</h2>
                 <div>
-                    <div id="qualityIndicators_Deadlines" class="field">
+                    <div id="qualityIndicators_MaxWaitingTime" class="field">
                         <p>Maximum job waiting time:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_SumOfDeadlines" class="field">
+                    <div id="qualityIndicators_SumOfWaitingTimes" class="field">
                         <p>Total job waiting times:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_AvarageDeadline" class="field">
+                    <div id="qualityIndicators_AvarageWaitingTime" class="field">
                         <p>Average job waiting time:</p>
                         <input type="number" disabled value="100">
                     </div>
@@ -638,12 +393,12 @@
             <div>
                 <h2>Downtime of all machines:</h2>
                 <div>
-                    <div id="qualityIndicators_Deadlines" class="field">
+                    <div id="qualityIndicators_IdleTime" class="field">
                         <p>Idle time of all machines:</p>
                         <input type="number" disabled value="100">
                     </div>
 
-                    <div id="qualityIndicators_SumOfDeadlines" class="field">
+                    <div id="qualityIndicators_ChangeoversCost" class="field">
                         <p>Machine changeover cost:</p>
                         <input type="number" disabled value="100">
                     </div>
@@ -651,7 +406,7 @@
             </div>
 
 
-            <footer>© <span id="copyrightYear">2024</span> <span class="copyrightMainInfo">Adam Geppert B.Sc.</span>
+            <footer>© <span id="copyrightYear">2024</span> <span class="copyrightMainInfo">inż. Adam Geppert</span>
                 All
                 rights
                 reserved. | Project and implementation of the application as part of the
@@ -660,6 +415,10 @@
         </section>
     </main>
 
+    <script src="json3.js"></script>
+    <script src="chart.min.js"></script>
+    <script src="chart.umd.js"></script>
+    <script src="chartjs-plugin-datalabels.min.js"></script>
     <script src="app.js"></script>
 </body>
 
