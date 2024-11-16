@@ -11,6 +11,9 @@ $accent-color: #5934EE;
     padding: 0;
     box-sizing: border-box;
     font-family: "Poppins", sans-serif;
+}
+
+*:not(canvas) {
     transition: all 0.3s;
 }
 
@@ -503,15 +506,13 @@ main {
                     gap: 15px;
 
                     .stacked {
+                        gap: 50px 0;
+
                         >div {
                             display: flex;
                             flex-direction: row;
                             flex-wrap: wrap;
                             gap: 10px;
-
-                            &:not(:nth-of-type(1)) {
-                                margin-top: 50px;
-                            }
 
                             >p {
                                 flex-basis: 100%;
@@ -539,6 +540,10 @@ main {
                 justify-content: flex-start;
                 flex-wrap: wrap;
                 gap: 50px 100px;
+
+                &.hide {
+                    display: none;
+                }
 
                 canvas {
                     background-color: #fff;
@@ -597,5 +602,17 @@ main {
                 }
             }
         }
+    }
+}
+
+@media (max-width: 1100px) {
+    nav {
+        width: 100px;
+    }
+
+    main {
+        left: 100px;
+        width: calc(100% - 100px);
+        padding: 60px 5%;
     }
 }

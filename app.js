@@ -4,11 +4,6 @@ window.onload = () => {
     //* GLOBAL VARIABLES -------------------------------------------------------------------------------------
     const navigationItems = document.querySelectorAll("nav div");
     const viewItems = document.querySelectorAll("main section");
-    const systemParams = document.querySelector("#systemParams");
-    const problemParams = document.querySelector("#problemParams");
-    const constraints = document.querySelector("#constraints");
-    const solution = document.querySelector("#solution");
-    const qualityIndicators = document.querySelector("#qualityIndicators");
     const importExportButtons = document.querySelectorAll(".import-export");
     const backToDataButtons = document.querySelectorAll(".backToData");
 
@@ -29,19 +24,19 @@ window.onload = () => {
     const problemParamsProcessingTimesWrapper = document.querySelector("#problemParams_ProcessingTimes");
     const problemParamsJobsRoutingWrapper = document.querySelector("#problemParams_JobsRouting");
 
-    const constraintsChangeovers = document.querySelector("#constraints_ChangeoversWrapper div");
     const constraintsChangeoversButton = document.querySelector("#constraints_Changeovers div");
     const constraintsChangeoversTimesWrapper = document.querySelector("#constraints_ChangeoverTimes");
     const constraintsChangeoverCostsWrapper = document.querySelector("#constraints_ChangeoverCosts");
 
-    const constraintsTransport = document.querySelector("#constraints_TransportWrapper div");
     const constraintsTransportButton = document.querySelector("#constraints_Transport div");
     const constraintsTransportResources = document.querySelector("#constraints_TransportResources input");
     const constraintsTransportTimesWrapper = document.querySelector("#constraints_TransportTimes");
 
     const solutionConflicts = document.querySelector("#solution_Conflicts");
     const solutionChangeovers = document.querySelector("#solution_ChangeoversList");
-    const solutioTransports = document.querySelector("#solution_TransportList");
+    const solutionChangeoversWrapper = document.querySelector("#solution_ChangeoversWrapper");
+    const solutionTransports = document.querySelector("#solution_TransportList");
+    const solutionTransportsWrapper = document.querySelector("#solution_TransportWrapper");
 
     let machines = [];
     let jobs = [];
@@ -55,7 +50,7 @@ window.onload = () => {
     let numberOfOperations = 1;
 
     let solutionToUpdate = true;
-    let navView = 1;
+    let navView = 0;
     const currentDate = new Date;
 
 
@@ -98,7 +93,6 @@ window.onload = () => {
     importExportButtons.forEach((e) => {
         e.addEventListener("click", () => {
             window.scrollTo(0, 0);
-
             document.querySelector("nav div.active").classList.remove("active");
 
             let oldActive = document.querySelector("section.active");
@@ -119,7 +113,7 @@ window.onload = () => {
         e.addEventListener("click", () => {
             window.scrollTo(0, 0);
 
-            navigationItems[navView - 1].classList.add("active");
+            navigationItems[navView].classList.add("active");
 
             let oldActive = document.querySelector("section.active");
             oldActive.classList.add('fade-out');
@@ -127,7 +121,7 @@ window.onload = () => {
             oldActive.addEventListener('transitionend', function handleTransitionEnd() {
                 oldActive.classList.remove('active', 'fade-out');
 
-                viewItems[navView].classList.add('active');
+                viewItems[navView + 1].classList.add('active');
                 oldActive.removeEventListener('transitionend', handleTransitionEnd);
             }, {
                 once: true
@@ -903,13 +897,25 @@ window.onload = () => {
 
         solutionConflicts.querySelectorAll('p').forEach(p => p.remove());
         solutionChangeovers.querySelectorAll('p').forEach(p => p.remove());
-        //solutioTransports.querySelectorAll('p').forEach(p => p.remove());
+        solutionTransports.querySelectorAll('p').forEach(p => p.remove());
+
+        if (changeovers.state == 0) {
+            solutionChangeoversWrapper.classList.add("hide");
+        } else {
+            solutionChangeoversWrapper.classList.remove("hide");
+        }
+
+        if (transports.state == 0) {
+            solutionTransportsWrapper.classList.add("hide");
+        } else {
+            solutionTransportsWrapper.classList.remove("hide");
+        }
 
         //! Infinite loop prevention bound
         let safetyBound = (jobs.reduce((total, obj) => {
             const operationsSum = obj.operationsTimes.reduce((sum, time) => sum + time, 0);
             return total + operationsSum;
-        }, 0)) * 2;
+        }, 0)) * 5;
 
         let waitingQueue = Array.from({
             length: numberOfMachineTypes
@@ -1095,9 +1101,9 @@ window.onload = () => {
             let jobsIDs = "";
             jobs.forEach((e, i) => {
                 if (i < (jobs.length - 1)) {
-                    jobsIDs += e.ID + " | ";
+                    jobsIDs += e.ID + "." + (e.operation + 1) + " | ";
                 } else {
-                    jobsIDs += e.ID;
+                    jobsIDs += e.ID + "." + (e.operation + 1);
                 }
             });
 
@@ -1133,7 +1139,7 @@ window.onload = () => {
             machineSpan.textContent = `Machine: ${machine.ID}`;
 
             const operationSpan = document.createElement('span');
-            operationSpan.textContent = `Operation: ${jobs.ID}`;
+            operationSpan.textContent = `Operation: ${jobs.ID}.${jobs.operation+1}`;
 
             const timeSpan = document.createElement('span');
             timeSpan.textContent = `Time: ${time}`;
@@ -1154,8 +1160,8 @@ window.onload = () => {
             machine.changeoversLabels.push(jobs.ID + "." + (jobs.operation + 1));
         }
 
-        function sortChangeovers() {
-            const paragraphs = Array.from(solutionChangeovers.querySelectorAll('p'));
+        function sortInformation(solutionElement) {
+            const paragraphs = Array.from(solutionElement.querySelectorAll('p'));
 
             paragraphs.sort((a, b) => {
                 const timeA = parseInt(a.querySelector('span:nth-child(3)').textContent.match(/(\d+)\s*-\s*\d+/)[1], 10);
@@ -1163,11 +1169,11 @@ window.onload = () => {
                 return timeA - timeB;
             });
 
-            solutionChangeovers.querySelectorAll('p').forEach(p => p.remove());
-            paragraphs.forEach(p => solutionChangeovers.appendChild(p));
+            solutionElement.querySelectorAll('p').forEach(p => p.remove());
+            paragraphs.forEach(p => solutionElement.appendChild(p));
         }
 
-        function addTransport(jobs, transport, timestamp) {
+        function addTransport(jobs, machine, timestamp) {
             const p = document.createElement('p');
 
             let time = "";
@@ -1179,27 +1185,33 @@ window.onload = () => {
                 }
             });
 
-            const machineSpan = document.createElement('span');
-            machineSpan.textContent = `Transport Resource: ${transport}`;
-
             const operationSpan = document.createElement('span');
-            operationSpan.textContent = `Operation: ${jobs.ID}`;
+            operationSpan.textContent = `Operation: ${jobs.ID}.${jobs.operation+1}`;
+
+            const machineSpan = document.createElement('span');
+            machineSpan.textContent = `Destination: M${machine.ID}`;
 
             const timeSpan = document.createElement('span');
             timeSpan.textContent = `Time: ${time}`;
 
 
-
-            p.appendChild(machineSpan);
             p.appendChild(operationSpan);
+            p.appendChild(machineSpan);
             p.appendChild(timeSpan);
 
-            solutioTransports.appendChild(p);
+            solutionTransports.appendChild(p);
+
+            let lineupEntry = {
+                x: [timestamp[0], timestamp[1]],
+                y: "J" + jobs.ID
+            }
+            jobs.transport.push(lineupEntry);
+            jobs.transportLabels.push(jobs.ID + "." + (jobs.operation + 1) + " > M" + machine.ID);
         }
 
         function assignJob(job, machine, timestamp) {
 
-            if (machine.lineup.length == 0) {
+            if (machine.lineup.length == 0 && job.operation == 0) {
                 assignJobToMachine(job, machine, timestamp, 0);
             } else {
                 let changeoverTime = 0;
@@ -1217,8 +1229,31 @@ window.onload = () => {
 
                 if (transports.state == 0) {
                     assignJobToMachine(job, machine, timestamp, changeoverTime);
+                } else {
+                    if (job.operation > 0) {
+                        applyTransport(job, machine, timestamp, changeoverTime);
+                    } else {
+                        assignJobToMachine(job, machine, timestamp, changeoverTime);
+                    }
                 }
 
+            }
+
+            function applyTransport(jobs, machine, timestamp, changeoverTime) {
+                let transportTime = jobs.availability;
+                let transportStart = transportTime;
+                transportTime += transports.times[jobs.routing[jobs.operation - 1] - 1][jobs.routing[jobs.operation] - 1];
+
+                if ((timestamp + changeoverTime) < transportTime) {
+                    changeoverTime = 0;
+                }
+
+                if (transportTime > timestamp) {
+                    timestamp = transportTime;
+                }
+
+                addTransport(jobs, machine, [transportStart, transportTime])
+                assignJobToMachine(jobs, machine, timestamp, changeoverTime);
             }
 
             function assignJobToMachine(job, machine, timestamp, changeoverTime) {
@@ -1239,7 +1274,8 @@ window.onload = () => {
         }
 
         generateGanttChart();
-        sortChangeovers();
+        sortInformation(solutionChangeovers);
+        sortInformation(solutionTransports);
 
         generateEvaluation();
     }
@@ -1268,9 +1304,7 @@ window.onload = () => {
                 lineupLabels: [],
                 jobs: [],
                 changeovers: [],
-                changeoversLabels: [],
-                transport: [],
-                transportLabels: []
+                changeoversLabels: []
             };
         }
     }
@@ -1305,7 +1339,9 @@ window.onload = () => {
                 operationsTimes: operationsTimes,
                 routing: routing,
                 operation: 0,
-                availability: arrival
+                availability: arrival,
+                transport: [],
+                transportLabels: []
             };
         }
     }
@@ -1357,53 +1393,44 @@ window.onload = () => {
     function generateTransports() {
         let state = constraintsTransportButton.innerText == "OFF" ? 0 : 1;
 
-        let costs = [];
-        let costsColumns = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn)");
+        let times = [];
+        let timesColumns = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn)");
         for (let i = 0; i < numberOfMachineTypes; i++) {
             let row = [];
 
             for (let j = 0; j < numberOfMachineTypes; j++) {
-                row.push(parseInt(costsColumns[j].querySelector(`input:nth-of-type(${i+1})`).value));
+                row.push(parseInt(timesColumns[j].querySelector(`input:nth-of-type(${i+1})`).value));
             }
 
-            costs.push(row);
+            times.push(row);
         }
 
-        transports = createTransportObject(state, parseInt(constraintsTransportResources.value), costs);
+        transports = createTransportObject(state, parseInt(constraintsTransportResources.value), times);
 
         function createTransportObject(state, resources, times) {
             return {
                 state: state,
                 resources: resources,
-                times: times
+                times: times,
+                availability: new Array(resources).fill(0),
+                position: new Array(resources).fill(-1)
             };
         }
     }
 
     //! Gantt chart creation function
     function generateGanttChart() {
-        let labels = [];
-        machines.forEach(e => {
-            labels.push("M" + e.ID);
-        });
-
         const datasetLabels = [];
-
-        const data = {
-            labels: labels,
-            datasets: []
-        };
 
         function createConfig() {
             return {
                 type: 'bar',
                 data: {
-                    labels: [...labels], // Kopia etykiet
-                    datasets: [] // Puste dane dla każdego wykresu
+                    labels: [],
+                    datasets: []
                 },
                 options: {
                     indexAxis: 'y',
-                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
@@ -1427,6 +1454,14 @@ window.onload = () => {
                         },
                         legend: {
                             display: false
+                        }
+                    },
+                    animation: {
+                        x: {
+                            duration: 500
+                        },
+                        y: {
+                            duration: 0
                         }
                     }
                 },
@@ -1479,6 +1514,15 @@ window.onload = () => {
                 document.querySelector('#solution_TransportGanttChart'),
                 createConfig()
             );
+
+            datasetLabels.length = 0;
+
+            jobs.forEach(e => {
+                e.transportLabels.forEach((l, i) => {
+                    let jobID = l.match(/\d+(?=\.)/);
+                    addData(ganttCharts[2], l, e.transport[i], jobsColors[jobID[0]]);
+                });
+            });
         }
 
         function addData(chart, label, data, color) {
@@ -1495,10 +1539,10 @@ window.onload = () => {
         }
 
         function randomColorGenerator() {
-            const getRandomLightValue = () => Math.floor(Math.random() * 128) + 128; // Losowe wartości od 128 do 255
-            const r = getRandomLightValue(); // Losowy kolor czerwony
-            const g = getRandomLightValue(); // Losowy kolor zielony
-            const b = getRandomLightValue(); // Losowy kolor niebieski
+            const getRandomLightValue = () => Math.floor(Math.random() * 128) + 128;
+            const r = getRandomLightValue();
+            const g = getRandomLightValue();
+            const b = getRandomLightValue();
 
             const randomColor = `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 

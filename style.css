@@ -5,6 +5,9 @@
   padding: 0;
   box-sizing: border-box;
   font-family: "Poppins", sans-serif;
+}
+
+*:not(canvas) {
   transition: all 0.3s;
 }
 
@@ -425,14 +428,14 @@ main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) {
   flex-direction: column;
   gap: 15px;
 }
+main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked {
+  gap: 50px 0;
+}
 main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   gap: 10px;
-}
-main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div:not(:nth-of-type(1)) {
-  margin-top: 50px;
 }
 main section#constraints > div:nth-of-type(2) > div:nth-of-type(3) .stacked > div > p {
   flex-basis: 100%;
@@ -451,6 +454,9 @@ main section#solution > div {
   justify-content: flex-start;
   flex-wrap: wrap;
   gap: 50px 100px;
+}
+main section#solution > div.hide {
+  display: none;
 }
 main section#solution > div canvas {
   background-color: #fff;
@@ -496,4 +502,15 @@ main section#qualityIndicators > div > div .field {
 main section#qualityIndicators > div > div .field input:disabled {
   opacity: 1;
   color: #000;
+}
+
+@media (max-width: 1100px) {
+  nav {
+    width: 100px;
+  }
+  main {
+    left: 100px;
+    width: calc(100% - 100px);
+    padding: 60px 5%;
+  }
 }/*# sourceMappingURL=style.css.map */
