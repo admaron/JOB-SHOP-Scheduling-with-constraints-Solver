@@ -1210,13 +1210,11 @@ window.onload = () => {
         }
 
         function assignJob(job, machine, timestamp) {
-            console.log(machine.lineup.length)
             if (machine.lineup.length == 0) {
                 assignJobToMachine(job, machine, timestamp, 0);
             } else {
                 let changeoverTime = 0;
                 if (changeovers.state == 1) {
-                    console.log(job.ID + "." + (job.operation + 1) + " | " + machine.ID)
                     changeoverTime = changeovers.times[machine.type - 1][machine.jobs[machine.jobs.length - 1] - 1][job.ID - 1];
 
                     if (machine.availability < timestamp) {
