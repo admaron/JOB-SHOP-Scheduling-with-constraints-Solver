@@ -131,7 +131,7 @@ window.onload = () => {
 
 
     //! Input characters restriction handler
-    const numberInputs = document.querySelectorAll('input[type="number"]');
+    const numberInputs = document.querySelectorAll('input[type="number"]:not(#systemParams_efficiencyCoefficient input)');
     numberInputs.forEach(input => allowOnlyPositiveDecimals(input));
 
     function allowOnlyPositiveDecimals(inputElement) {
@@ -277,15 +277,13 @@ window.onload = () => {
                     const input = document.createElement('input');
                     input.type = 'number';
                     input.value = 1;
+                    input.step = '0.01';
 
                     const p = document.createElement('p');
                     p.textContent = `M${i+1}.${j+1}`;
 
                     innerDiv.appendChild(input);
                     innerDiv.appendChild(p);
-
-                    //! Input validation
-                    allowOnlyPositiveDecimals(input);
 
                     input.addEventListener('change', (e) => {
                         solutionToUpdate = true;
@@ -295,6 +293,33 @@ window.onload = () => {
                             input.value = 0.01;
                         } else if (value > 1) {
                             input.value = 1;
+                        }
+                    });
+
+                    input.addEventListener('input', function () {
+                        let sanitizedValue = this.value.trim();
+
+                        sanitizedValue = sanitizedValue.replace(/,/g, '.');
+                        sanitizedValue = sanitizedValue.replace(/[^0-9.]/g, '');
+
+                        let parts = sanitizedValue.split('.');
+                        if (parts.length > 1) {
+                            parts[1] = parts[1].substring(0, 2);
+                            sanitizedValue = parts.join('.');
+                        }
+
+                        let value = parseFloat(sanitizedValue);
+
+                        if (isNaN(value)) {
+                            this.value = '0.01';
+                        } else {
+                            if (value < 0.01) {
+                                this.value = '0.01';
+                            } else if (value > 1) {
+                                this.value = '1';
+                            } else {
+                                this.value = sanitizedValue;
+                            }
                         }
                     });
 
@@ -1210,10 +1235,11 @@ window.onload = () => {
         }
 
         function assignJob(job, machine, timestamp) {
+            let changeoverTime = 0;
+
             if (machine.lineup.length == 0) {
-                assignJobToMachine(job, machine, timestamp, 0);
+                checkForTransport();
             } else {
-                let changeoverTime = 0;
                 if (changeovers.state == 1) {
                     changeoverTime = changeovers.times[machine.type - 1][machine.jobs[machine.jobs.length - 1] - 1][job.ID - 1];
 
@@ -1226,6 +1252,10 @@ window.onload = () => {
 
                 }
 
+                checkForTransport();
+            }
+
+            function checkForTransport() {
                 if (transports.state == 0) {
                     assignJobToMachine(job, machine, timestamp, changeoverTime);
                 } else {
@@ -1236,23 +1266,22 @@ window.onload = () => {
                     }
                 }
 
-            }
+                function applyTransport(jobs, machine, timestamp, changeoverTime) {
+                    let transportTime = jobs.availability;
+                    let transportStart = transportTime;
+                    transportTime += transports.times[jobs.routing[jobs.operation - 1] - 1][jobs.routing[jobs.operation] - 1];
 
-            function applyTransport(jobs, machine, timestamp, changeoverTime) {
-                let transportTime = jobs.availability;
-                let transportStart = transportTime;
-                transportTime += transports.times[jobs.routing[jobs.operation - 1] - 1][jobs.routing[jobs.operation] - 1];
+                    if ((timestamp + changeoverTime) < transportTime) {
+                        changeoverTime = 0;
 
-                if ((timestamp + changeoverTime) < transportTime) {
-                    changeoverTime = 0;
+                        if (transportTime > timestamp) {
+                            timestamp = transportTime;
+                        }
+                    }
+
+                    addTransport(jobs, machine, [transportStart, transportTime])
+                    assignJobToMachine(jobs, machine, timestamp, changeoverTime);
                 }
-
-                if (transportTime > timestamp) {
-                    timestamp = transportTime;
-                }
-
-                addTransport(jobs, machine, [transportStart, transportTime])
-                assignJobToMachine(jobs, machine, timestamp, changeoverTime);
             }
 
             function assignJobToMachine(job, machine, timestamp, changeoverTime) {
