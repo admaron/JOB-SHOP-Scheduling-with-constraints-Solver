@@ -222,7 +222,7 @@ main {
                     }
 
                     input {
-                        width: 30px;
+                        width: 50px;
                         background-color: transparent;
                         border: none;
 
@@ -444,8 +444,7 @@ main {
                 gap: 50px 100px;
 
 
-                >div:nth-of-type(1),
-                >div:nth-of-type(2) {
+                >div:nth-of-type(1) {
                     flex-basis: fit-content;
 
                     >p {
@@ -453,7 +452,7 @@ main {
                     }
                 }
 
-                >div:nth-of-type(3) {
+                >div:nth-of-type(2) {
                     flex-basis: 100%;
                     display: flex;
                     flex-direction: column;

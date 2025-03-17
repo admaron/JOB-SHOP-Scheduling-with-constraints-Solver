@@ -203,7 +203,7 @@ main section > div .field .titleColumn p {
           user-select: none;
 }
 main section > div .field .titleColumn input {
-  width: 30px;
+  width: 50px;
   background-color: transparent;
   border: none;
 }
@@ -377,21 +377,19 @@ main section#constraints > div:nth-of-type(1) {
   flex-wrap: wrap;
   gap: 50px 100px;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(1),
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(1) {
   flex-basis: fit-content;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(1) > p,
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) > p {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(1) > p {
   font-weight: 500;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) {
   flex-basis: 100%;
   display: flex;
   flex-direction: column;
   gap: 15px;
 }
-main section#constraints > div:nth-of-type(1) > div:nth-of-type(3) .stacked div {
+main section#constraints > div:nth-of-type(1) > div:nth-of-type(2) .stacked div {
   display: flex;
   flex-direction: column;
   gap: 10px;

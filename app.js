@@ -29,7 +29,6 @@ window.onload = () => {
     const constraintsChangeoverCostsWrapper = document.querySelector("#constraints_ChangeoverCosts");
 
     const constraintsTransportButton = document.querySelector("#constraints_Transport div");
-    const constraintsTransportResources = document.querySelector("#constraints_TransportResources input");
     const constraintsTransportTimesWrapper = document.querySelector("#constraints_TransportTimes");
 
     const solutionConflicts = document.querySelector("#solution_Conflicts");
@@ -56,8 +55,9 @@ window.onload = () => {
 
     //* BASICS -------------------------------------------------------------------------------------
     //! Copyright year update
-    document.querySelector("#copyrightYear").innerText = currentDate.getFullYear();
-
+    document.querySelectorAll("#copyrightYear").forEach(e => {
+        e.innerText = currentDate.getFullYear();
+    });
 
     //! Navigation handler
     navigationItems.forEach((e, i) => {
@@ -172,7 +172,6 @@ window.onload = () => {
         ],
         changeoversCosts: [5, 5, 7, 2, 1],
         transportState: "ON",
-        transportResources: 3,
         transportTimes: [0, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 0, 10, 10, 10, 10, 10, 0]
     };
 
@@ -190,7 +189,7 @@ window.onload = () => {
             e.target.value = number;
         }
 
-        if (parseInt(number) >= "15") {
+        if (parseInt(number) >= "50") {
             number = 15;
             e.target.value = number;
         }
@@ -204,7 +203,8 @@ window.onload = () => {
         updateNumberOfMachinesOfGivenType(numberOfMachineTypes);
 
         updateChangeoversCost(numberOfMachineTypes);
-        updateTransportTimesBetweenMachines(numberOfMachineTypes);
+        updateChangeoversTimes(numberOfJobs);
+        updateTransportTimesBetweenMachines();
     });
 
     //! Number of machines of given type fields update handler
@@ -239,6 +239,8 @@ window.onload = () => {
 
                 //! Triggers
                 updateEfficiencyCoefficient(1, i, input.value);
+                updateTransportTimesBetweenMachines();
+                updateChangeoversTimes(numberOfJobs);
             });
 
             fieldDiv.appendChild(p);
@@ -388,7 +390,7 @@ window.onload = () => {
             e.target.value = number;
         }
 
-        if (parseInt(number) >= "15") {
+        if (parseInt(number) >= "55") {
             number = 15;
             e.target.value = number;
         }
@@ -404,7 +406,6 @@ window.onload = () => {
         updateJobsRouting(numberOfJobs, numberOfOperations);
 
         updateChangeoversTimes(numberOfJobs);
-        updateTransportTimesBetweenMachines(numberOfMachineTypes);
     });
 
     //! Max. number of operations handler
@@ -418,7 +419,7 @@ window.onload = () => {
             e.target.value = number;
         }
 
-        if (parseInt(number) >= "15") {
+        if (parseInt(number) >= "50") {
             number = 15;
             e.target.value = number;
         }
@@ -654,41 +655,19 @@ window.onload = () => {
 
         if (e.innerText == "ON") {
             e.innerText = "OFF";
-            constraintsTransportResources.disabled = true;
             constraintsTransportTimes.forEach(e => {
                 e.disabled = true;
             });
         } else {
             e.innerText = "ON";
-            constraintsTransportResources.disabled = false;
             constraintsTransportTimes.forEach(e => {
                 e.disabled = false;
             });
         }
     }
 
-    //! Number of transport resources handler
-    constraintsTransportResources.addEventListener("change", (e) => {
-        solutionToUpdate = true;
-
-        //! Input validation
-        let number = e.target.value;
-        if (number <= 0 || "") {
-            number = 1;
-            e.target.value = number;
-        }
-
-        if (parseInt(number) >= "15") {
-            number = 15;
-            e.target.value = number;
-        }
-
-        number = parseInt(number);
-        e.target.value = number;
-    });
-
     //! Transport times between machines update handler
-    function updateTransportTimesBetweenMachines(machines) {
+    function updateTransportTimesBetweenMachines() {
         const children = Array.from(constraintsTransportTimesWrapper.children);
         children.forEach(child => child.remove());
 
@@ -700,58 +679,67 @@ window.onload = () => {
         p.textContent = `.`;
         fieldDiv.appendChild(p);
 
-        for (let j = 0; j < machines; j++) {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = `M${j+1}`;
-            input.disabled = true;
-            fieldDiv.appendChild(input);
-        }
+        numberOfMachinesOfGivenType.forEach((e, i) => {
+            for (let j = 0; j < e; j++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = `M${i+1}.${j+1}`;
+                input.disabled = true;
+                fieldDiv.appendChild(input);
+            }
+        });
         constraintsTransportTimesWrapper.appendChild(fieldDiv);
 
         //! Dynamic content columns
-        for (let i = 0; i < machines; i++) {
-            const fieldDiv = document.createElement('div');
+        let numberOfAllMachines = numberOfMachinesOfGivenType.reduce((acc, cur) => acc + parseInt(cur), 0);
+        let diagonalSpot = -1;
 
-            const p = document.createElement('p');
-            p.textContent = `M${i+1}`;
-            fieldDiv.appendChild(p);
 
-            for (let j = 0; j < machines; j++) {
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.value = 0;
+        numberOfMachinesOfGivenType.forEach((e, n) => {
+            for (let i = 0; i < e; i++) {
+                diagonalSpot++;
+                const fieldDiv = document.createElement('div');
 
-                if (i == j) {
-                    input.disabled = true;
-                    input.className = "disabled";
-                }
+                const p = document.createElement('p');
+                p.textContent = `M${n+1}.${i+1}`;
+                fieldDiv.appendChild(p);
 
-                //! Input validation
-                allowOnlyPositiveDecimals(input);
+                for (let j = 0; j < numberOfAllMachines; j++) {
+                    const input = document.createElement('input');
+                    input.type = 'number';
+                    input.value = 0;
 
-                input.addEventListener("change", () => {
-                    solutionToUpdate = true;
+                    //! Input validation
+                    allowOnlyPositiveDecimals(input);
 
-                    let value = parseInt(input.value);
-                    if (value < 0 || input.value == "") {
-                        value = 0;
+                    input.addEventListener("change", () => {
+                        solutionToUpdate = true;
+
+                        let value = parseInt(input.value);
+                        if (value < 0 || input.value == "") {
+                            value = 0;
+                            input.value = value;
+                        } else if (value > 1000) {
+                            value = 1000;
+                            input.value = value;
+                        }
+
+                        value = parseInt(value);
                         input.value = value;
-                    } else if (value > 1000) {
-                        value = 1000;
-                        input.value = value;
+                    });
+
+                    if (diagonalSpot == j) {
+                        input.disabled = true;
+                        input.className = "disabled";
+                        input.value = 0;
                     }
 
-                    value = parseInt(value);
-                    input.value = value;
-                });
+                    fieldDiv.appendChild(input);
+                }
 
-
-                fieldDiv.appendChild(input);
+                constraintsTransportTimesWrapper.appendChild(fieldDiv);
             }
-
-            constraintsTransportTimesWrapper.appendChild(fieldDiv);
-        }
+        });
     }
 
 
@@ -791,75 +779,77 @@ window.onload = () => {
         const children = Array.from(constraintsChangeoversTimesWrapper.children);
         children.forEach(child => child.remove());
 
-        for (let m = 0; m < numberOfMachineTypes; m++) {
-            const changeoversTimeWrapper = document.createElement('div');
+        for (let mm = 0; mm < numberOfMachineTypes; mm++) {
+            for (let m = 0; m < numberOfMachinesOfGivenType[mm]; m++) {
+                const changeoversTimeWrapper = document.createElement('div');
 
-            //! Machine type label
-            const label = document.createElement('p');
-            label.textContent = "Machine type " + (m + 1) + ":";
-            changeoversTimeWrapper.appendChild(label);
+                //! Machine type label
+                const label = document.createElement('p');
+                label.textContent = "For Machine " + (mm + 1) + "." + (m + 1) + ":";
+                changeoversTimeWrapper.appendChild(label);
 
-            //! Vertical label column
-            const fieldDiv = document.createElement('div');
-            fieldDiv.className = "titleColumn";
-
-            const p = document.createElement('p');
-            p.textContent = `.`;
-            fieldDiv.appendChild(p);
-
-            for (let j = 0; j < jobs; j++) {
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.value = `J${j+1}`;
-                input.disabled = true;
-                fieldDiv.appendChild(input);
-            }
-            changeoversTimeWrapper.appendChild(fieldDiv);
-
-            //! Dynamic content columns
-            for (let i = 0; i < jobs; i++) {
+                //! Vertical label column
                 const fieldDiv = document.createElement('div');
+                fieldDiv.className = "titleColumn";
 
                 const p = document.createElement('p');
-                p.textContent = `J${i+1}`;
+                p.textContent = `.`;
                 fieldDiv.appendChild(p);
 
                 for (let j = 0; j < jobs; j++) {
                     const input = document.createElement('input');
-                    input.type = 'number';
-                    input.value = 0;
-
-                    if (i == j) {
-                        input.disabled = true;
-                        input.className = "disabled";
-                    }
-
-                    //! Input validation
-                    allowOnlyPositiveDecimals(input);
-
-                    input.addEventListener("change", () => {
-                        solutionToUpdate = true;
-
-                        let value = parseInt(input.value);
-                        if (value < 0 || input.value == "") {
-                            value = 0;
-                            input.value = value;
-                        } else if (value > 1000) {
-                            value = 1000;
-                            input.value = value;
-                        }
-
-                        value = parseInt(value);
-                        input.value = value;
-                    });
-
+                    input.type = 'text';
+                    input.value = `J${j+1}`;
+                    input.disabled = true;
                     fieldDiv.appendChild(input);
                 }
-
                 changeoversTimeWrapper.appendChild(fieldDiv);
-            }
 
-            constraintsChangeoversTimesWrapper.appendChild(changeoversTimeWrapper);
+                //! Dynamic content columns
+                for (let i = 0; i < jobs; i++) {
+                    const fieldDiv = document.createElement('div');
+
+                    const p = document.createElement('p');
+                    p.textContent = `J${i+1}`;
+                    fieldDiv.appendChild(p);
+
+                    for (let j = 0; j < jobs; j++) {
+                        const input = document.createElement('input');
+                        input.type = 'number';
+                        input.value = 0;
+
+                        if (i == j) {
+                            input.disabled = true;
+                            input.className = "disabled";
+                        }
+
+                        //! Input validation
+                        allowOnlyPositiveDecimals(input);
+
+                        input.addEventListener("change", () => {
+                            solutionToUpdate = true;
+
+                            let value = parseInt(input.value);
+                            if (value < 0 || input.value == "") {
+                                value = 0;
+                                input.value = value;
+                            } else if (value > 1000) {
+                                value = 1000;
+                                input.value = value;
+                            }
+
+                            value = parseInt(value);
+                            input.value = value;
+                        });
+
+                        fieldDiv.appendChild(input);
+                    }
+
+                    changeoversTimeWrapper.appendChild(fieldDiv);
+                }
+
+                constraintsChangeoversTimesWrapper.appendChild(changeoversTimeWrapper);
+            }
         }
     }
 
@@ -962,20 +952,26 @@ window.onload = () => {
 
             for (let m = 0; m < numberOfMachineTypes; m++) {
                 if (waitingQueue[m].length > 0) { //! Check if any job is waiting for machine
-                    const waitingQueueSize = waitingQueue[m].length;
+                    let index = 0;
 
-                    for (let z = 0; z < waitingQueueSize; z++) {
+                    while (index < waitingQueue[m].length) {
+                        const e = waitingQueue[m][index];
                         const matchingMachines = machines.filter(machine => machine.type === (m + 1));
-                        const selectedMachines = matchingMachines.filter(machine => machine.availability <= i);
+                        const baseSelectedMachines = matchingMachines.filter(machine => machine.availability <= i);
+                        const selectedMachines = baseSelectedMachines.filter(machine => machine.ID !== e.prevMachineID[1]);
 
                         if (selectedMachines.length >= 1) {
+                            let selectedMachine = selectMachine(selectedMachines);
+
                             if (waitingQueue[m].length > 1) {
-                                addConflict(waitingQueue[m], (m + 1), i);
+                                addConflict(waitingQueue[m], selectedMachine, i);
                             }
 
-                            assignJob(solveConflict(waitingQueue[m]), selectMachine(selectedMachines), i);
+                            assignJob(solveConflict(waitingQueue[m]), selectedMachine, i);
+                        } else {
+                            index++;
                         }
-                    }
+                    };
                 }
             }
         }
@@ -1139,7 +1135,7 @@ window.onload = () => {
             conflictTimeSpan.textContent = `Conflict Time: ${timestamp}`;
 
             const conflictMachineSpan = document.createElement('span');
-            conflictMachineSpan.textContent = `Machine type: ${machine}`;
+            conflictMachineSpan.textContent = `Machine: ${machine.ID}`;
 
             p.appendChild(operationsSpan);
             p.appendChild(conflictTimeSpan);
@@ -1236,12 +1232,15 @@ window.onload = () => {
 
         function assignJob(job, machine, timestamp) {
             let changeoverTime = 0;
+            job.prevMachineID[0] = job.prevMachineID[1];
+            job.prevMachineID[1] = machine.ID;
 
             if (machine.lineup.length == 0) {
                 checkForTransport();
             } else {
                 if (changeovers.state == 1) {
-                    changeoverTime = changeovers.times[machine.type - 1][machine.jobs[machine.jobs.length - 1] - 1][job.ID - 1];
+                    let machineNR = machine.ID.split(".");
+                    changeoverTime = changeovers.times[(machine.type - 1) + (machineNR[1] - 1)][machine.jobs[machine.jobs.length - 1] - 1][job.ID - 1];
 
                     if (machine.availability < timestamp) {
                         addChangeover(job, machine, [machine.availability, (machine.availability + changeoverTime)], changeoverTime);
@@ -1269,7 +1268,10 @@ window.onload = () => {
                 function applyTransport(jobs, machine, timestamp, changeoverTime) {
                     let transportTime = jobs.availability;
                     let transportStart = transportTime;
-                    transportTime += transports.times[jobs.routing[jobs.operation - 1] - 1][jobs.routing[jobs.operation] - 1];
+                    let prevSplit = jobs.prevMachineID[0].split(".");
+                    let curSplit = jobs.prevMachineID[1].split(".");
+
+                    transportTime += transports.times[sumFirstNElements(parseInt(prevSplit[0]) - 1) + parseInt(prevSplit[1]) - 1][sumFirstNElements(parseInt(curSplit[0]) - 1) + parseInt(curSplit[1]) - 1];
 
                     if ((timestamp + changeoverTime) < transportTime) {
                         changeoverTime = 0;
@@ -1281,6 +1283,15 @@ window.onload = () => {
 
                     addTransport(jobs, machine, [transportStart, transportTime])
                     assignJobToMachine(jobs, machine, timestamp, changeoverTime);
+
+                    function sumFirstNElements(count) {
+                        return numberOfMachinesOfGivenType
+                            .slice(0, count)
+                            .reduce((acc, current) => {
+                                let num = parseFloat(current);
+                                return isNaN(num) ? acc : acc + num;
+                            }, 0);
+                    }
                 }
             }
 
@@ -1368,6 +1379,7 @@ window.onload = () => {
                 routing: routing,
                 operation: 0,
                 availability: arrival,
+                prevMachineID: ["0", "0"],
                 transport: [],
                 transportLabels: []
             };
@@ -1420,28 +1432,26 @@ window.onload = () => {
     //! Transport object creation function
     function generateTransports() {
         let state = constraintsTransportButton.innerText == "OFF" ? 0 : 1;
+        let numberOfAllMachines = numberOfMachinesOfGivenType.reduce((acc, cur) => acc + parseInt(cur), 0);
 
         let times = [];
         let timesColumns = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn)");
-        for (let i = 0; i < numberOfMachineTypes; i++) {
+        for (let i = 0; i < numberOfAllMachines; i++) {
             let row = [];
 
-            for (let j = 0; j < numberOfMachineTypes; j++) {
+            for (let j = 0; j < numberOfAllMachines; j++) {
                 row.push(parseInt(timesColumns[j].querySelector(`input:nth-of-type(${i+1})`).value));
             }
 
             times.push(row);
         }
 
-        transports = createTransportObject(state, parseInt(constraintsTransportResources.value), times);
+        transports = createTransportObject(state, times);
 
-        function createTransportObject(state, resources, times) {
+        function createTransportObject(state, times) {
             return {
                 state: state,
-                resources: resources,
-                times: times,
-                availability: new Array(resources).fill(0),
-                position: new Array(resources).fill(-1)
+                times: times
             };
         }
     }
@@ -1739,20 +1749,11 @@ window.onload = () => {
         }
         transportStateSwitch(constraintsTransportButton);
 
-        constraintsTransportResources.value = importedData.transportResources;
-
         const inputTransportTimes = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
         const size = Math.sqrt(inputTransportTimes.length);
 
         for (let i = 0; i < inputTransportTimes.length; i++) {
-            const row = Math.floor(i / size);
-            const column = i % size;
-
-            if (row != column) {
-                inputTransportTimes[i].value = importedData.transportTimes[i];
-            } else {
-                inputTransportTimes[i].value = 0;
-            }
+            inputTransportTimes[i].value = importedData.transportTimes[i];
         }
 
 
@@ -1805,7 +1806,6 @@ window.onload = () => {
             changeoversTimes: [],
             changeoversCosts: [],
             transportState: "OFF",
-            transportResources: 0,
             transportTimes: []
         };
 
@@ -1851,7 +1851,6 @@ window.onload = () => {
 
         //! Constraints
         exportedData.transportState = constraintsTransportButton.innerText;
-        exportedData.transportResources = constraintsTransportResources.value;
 
         const inputTransportTimes = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
         for (let i = 0; i < inputTransportTimes.length; i++) {
