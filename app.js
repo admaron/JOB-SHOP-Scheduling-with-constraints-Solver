@@ -460,13 +460,10 @@ window.onload = () => {
                 solutionToUpdate = true;
 
                 let value = parseInt(input.value);
-                if (value < 10 || input.value == "") {
-                    input.value = 0;
-                } else if (value > 1000) {
-                    input.value = 1000;
+                if (value > 1000) {
+                    value = 1000;
                 }
 
-                value = parseInt(value);
                 input.value = value;
             });
 
@@ -1676,11 +1673,27 @@ window.onload = () => {
 
 
     //* IMPORT / EXPORT -------------------------------------------------------------------------------------
-    importData(JSON.stringify(initialData)); //! Initial data load
+    importData(initialData); //! Initial data load
 
     //! Import button handler
     importBTN.addEventListener("click", () => {
-        importData(importTextarea.value);
+        let importedData;
+
+        try {
+            importedData = JSON.parse(importTextarea.value);
+        } catch (e) {
+            alert("Błąd: Niepoprawny format JSON.");
+            return;
+        }
+
+        try {
+            validateImportedData(importedData);
+        } catch (e) {
+            alert("Błąd walidacji: " + e.message);
+            return;
+        }
+
+        importData(importedData);
         navigationItems[0].click();
     });
 
@@ -1693,8 +1706,8 @@ window.onload = () => {
 
     //! Import function
     function importData(data) {
+        let importedData = data;
         const event = new Event("change");
-        const importedData = JSON.parse(data);
 
         //! System parameters
         systemParamsNumberOfMachineTypes.value = importedData.numberOfMachineTypes;
@@ -1740,7 +1753,6 @@ window.onload = () => {
             inputRouting[i].value = importedData.jobsRouting[i];
         }
 
-
         //! Constraints
         if (importedData.transportState == "ON") {
             constraintsTransportButton.innerText = "OFF";
@@ -1750,12 +1762,9 @@ window.onload = () => {
         transportStateSwitch(constraintsTransportButton);
 
         const inputTransportTimes = constraintsTransportTimesWrapper.querySelectorAll("div:not(.titleColumn) > input");
-        const size = Math.sqrt(inputTransportTimes.length);
-
         for (let i = 0; i < inputTransportTimes.length; i++) {
             inputTransportTimes[i].value = importedData.transportTimes[i];
         }
-
 
         if (importedData.changeoversState == "ON") {
             constraintsChangeoversButton.innerText = "OFF";
@@ -1768,16 +1777,10 @@ window.onload = () => {
         changeoversTimes.forEach((e, num) => {
             const inputChangeoversTimes = e.querySelectorAll("div:not(.titleColumn) > input");
             const size = Math.sqrt(inputChangeoversTimes.length);
-
             for (let i = 0; i < inputChangeoversTimes.length; i++) {
                 const row = Math.floor(i / size);
                 const column = i % size;
-
-                if (row != column) {
-                    inputChangeoversTimes[i].value = importedData.changeoversTimes[num][i];
-                } else {
-                    inputChangeoversTimes[i].value = 0;
-                }
+                inputChangeoversTimes[i].value = row !== column ? importedData.changeoversTimes[num][i] : 0;
             }
         });
 
@@ -1785,7 +1788,121 @@ window.onload = () => {
         for (let i = 0; i < inputChangeoversCosts.length; i++) {
             inputChangeoversCosts[i].value = importedData.changeoversCosts[i];
         }
+    }
 
+    function validateImportedData(data) {
+        const isArray = Array.isArray;
+        const isInt = (val) => Number.isInteger(Number(val));
+        const isPositiveInt = (val) => isInt(val) && Number(val) > 0;
+        const isInRange = (val, min, max) => isInt(val) && Number(val) >= min && Number(val) <= max;
+        const isNonNegativeIntUnder1000 = (val) => isInt(val) && Number(val) >= 0 && Number(val) <= 1000;
+        const isEfficiencyValue = (val) => {
+            const num = Number(val);
+            return !isNaN(num) && num > 0 && num <= 1 && Number(num.toFixed(2)) === num;
+        };
+
+        const check = (condition, message) => {
+            if (!condition) throw new Error(message);
+        };
+
+        const nTypes = Number(data.numberOfMachineTypes);
+        const nJobs = Number(data.numberOfJobs);
+        const nOps = Number(data.numberOfOperations);
+        const matrixSize = nJobs * nOps;
+
+        // Liczba wszystkich maszyn:
+        check(isArray(data.numberOfMachinesOfGivenType), "Brakuje tablicy 'numberOfMachinesOfGivenType'");
+        const totalMachines = data.numberOfMachinesOfGivenType.reduce((sum, val) => sum + Number(val), 0);
+
+        // --- SYSTEM PARAMETERS ---
+        check(isInRange(nTypes, 1, 15), "'numberOfMachineTypes' musi być w zakresie 1–15");
+
+        check(data.numberOfMachinesOfGivenType.length === nTypes,
+            `Tablica 'numberOfMachinesOfGivenType' ma długość ${data.numberOfMachinesOfGivenType.length}, oczekiwano ${nTypes}`);
+        data.numberOfMachinesOfGivenType.forEach((v, i) =>
+            check(isInRange(v, 1, 15), `Wartość 'numberOfMachinesOfGivenType[${i}]' musi być całkowita z zakresu 1–15`));
+
+        check(isArray(data.efficiencyCoefficient), "Brakuje tablicy 'efficiencyCoefficient'");
+        check(data.efficiencyCoefficient.length === nTypes,
+            `Tablica 'efficiencyCoefficient' ma długość ${data.efficiencyCoefficient.length}, oczekiwano ${nTypes}`);
+        data.efficiencyCoefficient.forEach((v, i) =>
+            check(isEfficiencyValue(v), `Wartość 'efficiencyCoefficient[${i}]' musi być w zakresie (0, 1] z dokładnością do 2 miejsc po przecinku`));
+
+        // --- PROBLEM PARAMETERS ---
+        check(isInRange(nJobs, 1, 15), "'numberOfJobs' musi być w zakresie 1–15");
+        check(isInRange(nOps, 1, 15), "'numberOfOperations' musi być w zakresie 1–15");
+
+        const allowedPriorityRules = ["FIFO", "LIFO", "SPT", "LPT", "EDD", "LWR"];
+        check(typeof data.priorityRule === "string", "'priorityRule' musi być tekstem");
+        check(allowedPriorityRules.includes(data.priorityRule),
+            `'priorityRule' ma niedozwoloną wartość: ${data.priorityRule}. Dozwolone: ${allowedPriorityRules.join(", ")}`);
+
+        check(isArray(data.jobsArrivalTime), "Brakuje tablicy 'jobsArrivalTime'");
+        check(data.jobsArrivalTime.length === nJobs,
+            `Tablica 'jobsArrivalTime' ma długość ${data.jobsArrivalTime.length}, oczekiwano ${nJobs}`);
+        data.jobsArrivalTime.forEach((v, i) =>
+            check(isNonNegativeIntUnder1000(v), `Wartość 'jobsArrivalTime[${i}]' musi być całkowita z zakresu 0–1000`));
+
+        check(isArray(data.jobsCompletionTimes), "Brakuje tablicy 'jobsCompletionTimes'");
+        check(data.jobsCompletionTimes.length === nJobs,
+            `Tablica 'jobsCompletionTimes' ma długość ${data.jobsCompletionTimes.length}, oczekiwano ${nJobs}`);
+        data.jobsCompletionTimes.forEach((v, i) =>
+            check(isNonNegativeIntUnder1000(v), `Wartość 'jobsCompletionTimes[${i}]' musi być całkowita z zakresu 0–1000`));
+
+        check(isArray(data.jobsProcessingTimes), "Brakuje tablicy 'jobsProcessingTimes'");
+        check(data.jobsProcessingTimes.length === matrixSize,
+            `Tablica 'jobsProcessingTimes' ma długość ${data.jobsProcessingTimes.length}, oczekiwano ${matrixSize} (czyli ${nJobs} × ${nOps})`);
+        data.jobsProcessingTimes.forEach((v, i) =>
+            check(isNonNegativeIntUnder1000(v), `Wartość 'jobsProcessingTimes[${i}]' musi być całkowita z zakresu 0–1000`));
+
+        check(isArray(data.jobsRouting), "Brakuje tablicy 'jobsRouting'");
+        check(data.jobsRouting.length === matrixSize,
+            `Tablica 'jobsRouting' ma długość ${data.jobsRouting.length}, oczekiwano ${matrixSize} (czyli ${nJobs} × ${nOps})`);
+        data.jobsRouting.forEach((v, i) =>
+            check(isInt(v) && Number(v) >= 0 && Number(v) <= totalMachines,
+                `Wartość 'jobsRouting[${i}]' musi być liczbą całkowitą od 0 (brak) do ${totalMachines} (liczba maszyn)`));
+
+        // --- TRANSPORT ---
+        check(["ON", "OFF"].includes(data.transportState), "'transportState' musi być ON albo OFF");
+
+        const transportSize = nTypes * nTypes;
+        check(isArray(data.transportTimes), "Brakuje tablicy 'transportTimes'");
+        check(data.transportTimes.length === transportSize,
+            `Tablica 'transportTimes' ma długość ${data.transportTimes.length}, oczekiwano ${transportSize} (czyli ${nTypes} × ${nTypes})`);
+        data.transportTimes.forEach((v, i) =>
+            check(isNonNegativeIntUnder1000(v), `Wartość 'transportTimes[${i}]' musi być całkowita z zakresu 0–1000`));
+
+        // --- CHANGEOVERS ---
+        check(["ON", "OFF"].includes(data.changeoversState), "'changeoversState' musi być ON albo OFF");
+
+        check(isArray(data.changeoversTimes), "Brakuje tablicy 'changeoversTimes'");
+        check(data.changeoversTimes.length === totalMachines,
+            `Tablica 'changeoversTimes' ma ${data.changeoversTimes.length} warstw, oczekiwano ${totalMachines} (tyle, ile jest maszyn)`);
+
+        const changeoverMatrixSize = nJobs * nJobs;
+        data.changeoversTimes.forEach((layer, idx) => {
+            check(isArray(layer), `Warstwa 'changeoversTimes[${idx}]' nie jest tablicą`);
+            check(layer.length === changeoverMatrixSize,
+                `Warstwa 'changeoversTimes[${idx}]' ma długość ${layer.length}, oczekiwano ${changeoverMatrixSize} (czyli ${nJobs} × ${nJobs})`);
+
+            layer.forEach((v, i) => {
+                const row = Math.floor(i / nJobs);
+                const col = i % nJobs;
+                if (row === col) {
+                    check(Number(v) === 0,
+                        `Przekątna 'changeoversTimes[${idx}][${i}]' (z zlecenia ${row + 1} na to samo) musi mieć wartość 0`);
+                } else {
+                    check(isNonNegativeIntUnder1000(v),
+                        `Wartość 'changeoversTimes[${idx}][${i}]' (z zlecenia ${row + 1} na ${col + 1}) musi być całkowita z zakresu 0–1000`);
+                }
+            });
+        });
+
+        check(isArray(data.changeoversCosts), "Brakuje tablicy 'changeoversCosts'");
+        check(data.changeoversCosts.length === nTypes,
+            `Tablica 'changeoversCosts' ma długość ${data.changeoversCosts.length}, oczekiwano ${nTypes}`);
+        data.changeoversCosts.forEach((v, i) =>
+            check(isNonNegativeIntUnder1000(v), `Wartość 'changeoversCosts[${i}]' musi być całkowita z zakresu 0–1000`));
     }
 
 
