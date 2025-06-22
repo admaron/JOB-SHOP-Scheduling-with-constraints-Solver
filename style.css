@@ -459,7 +459,6 @@ main section#solution > div.hide {
 main section#solution > div canvas {
   background-color: #fff;
   max-width: 100%;
-  max-height: 90vh;
 }
 main section#solution > div > div {
   flex-basis: 100%;

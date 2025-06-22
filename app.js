@@ -41,6 +41,7 @@ window.onload = () => {
     let jobs = [];
     let changeovers = [];
     let transports = [];
+    let solutionConflictsData = [];
     let ganttCharts = [];
 
     let numberOfMachineTypes = 1;
@@ -901,6 +902,7 @@ window.onload = () => {
 
         machines = [];
         jobs = [];
+        solutionConflictsData = [];
 
         generateMachines();
         generateJobs();
@@ -1139,6 +1141,15 @@ window.onload = () => {
             p.appendChild(conflictMachineSpan);
 
             solutionConflicts.appendChild(p);
+            solutionConflictsData.push(createMConflictObject(jobsIDs, timestamp, machine.ID));
+
+            function createMConflictObject(jobID, timestamp, machineID) {
+                return {
+                    jobID: jobID,
+                    timestamp: timestamp,
+                    machineID: machineID
+                };
+            }
         }
 
         function addChangeover(jobs, machine, timestamp, requiredTime) {
@@ -1457,7 +1468,7 @@ window.onload = () => {
     function generateGanttChart() {
         const datasetLabels = [];
 
-        function createConfig() {
+        function createConfig(yLabels = []) {
             return {
                 type: 'bar',
                 data: {
@@ -1467,11 +1478,28 @@ window.onload = () => {
                 options: {
                     indexAxis: 'y',
                     scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: maxTime
+                        },
                         y: {
+                            type: 'category',
+                            labels: yLabels,
                             beginAtZero: true,
                             stacked: true,
                             grid: {
                                 display: false
+                            }
+                        },
+                        y_conflicts: {
+                            type: 'category',
+                            labels: yLabels,
+                            offset: true,
+                            stacked: false,
+                            position: 'left',
+                            display: false,
+                            ticks: {
+                                mirror: true
                             }
                         }
                     },
@@ -1516,10 +1544,112 @@ window.onload = () => {
             });
         }
 
+        const uniqueSortedMachines = machines
+            .filter(machine => Array.isArray(machine.lineup) && machine.lineup.length > 0)
+            .map(machine => "M" + machine.ID)
+            .sort((a, b) => {
+                const [aMain, aSub] = a.slice(1).split('.').map(Number);
+                const [bMain, bSub] = b.slice(1).split('.').map(Number);
+                return aMain - bMain || aSub - bSub;
+            });
+
+        const baseHeightPerRow = 13;
+        const minHeight = 125;
+        const totalHeight = Math.max(minHeight, uniqueSortedMachines.length * baseHeightPerRow);
+        const totalHeight2 = Math.max(minHeight, jobs.length * baseHeightPerRow);
+
+        document.querySelector('#solution_GanttChart').height = totalHeight;
+        document.querySelector('#solution_ChangeoversGanttChart').height = totalHeight;
+        document.querySelector('#solution_TransportGanttChart').height = totalHeight2;
+
+        let maxTime = 0;
+        machines.forEach(machine => {
+            if (Array.isArray(machine.lineup)) {
+                machine.lineup.forEach(op => {
+                    maxTime = Math.max(maxTime, op.x[1]);
+                });
+            }
+        });
+
         ganttCharts[0] = new Chart(
             document.querySelector('#solution_GanttChart'),
-            createConfig()
+            createConfig(uniqueSortedMachines)
         );
+
+        if (Array.isArray(solutionConflictsData)) {
+            const conflictDots = [];
+
+            solutionConflictsData.sort((a, b) => {
+                const [aMain, aSub] = a.machineID.split('.').map(Number);
+                const [bMain, bSub] = b.machineID.split('.').map(Number);
+
+                return aMain - bMain || aSub - bSub;
+            });
+
+            solutionConflictsData.forEach(conflict => {
+                conflictDots.push({
+                    x: conflict.timestamp,
+                    y: "M" + conflict.machineID,
+                    jobs: conflict.jobID
+                });
+            });
+
+            ganttCharts[0].options.plugins.tooltip.callbacks = {
+                title: function (tooltipItems) {
+                    const point = tooltipItems[0].raw;
+                    return `Operations: ${point.jobs}`;
+                },
+                label: function (context) {
+                    const point = context.raw;
+                    return `Conflict Time: ${point.x}, Machine: ${point.y}`;
+                }
+            };
+            ganttCharts[0].options.plugins.tooltip.callbacks = {
+                title: function (tooltipItems) {
+                    const datasetLabel = tooltipItems[0].dataset.label;
+                    const point = tooltipItems[0].raw;
+
+                    if (datasetLabel === 'Conflicts') {
+                        return `Conflict: ${point.jobs}`;
+                    }
+
+                    return `Operation: ${tooltipItems[0].dataset.label}`;
+                },
+                label: function (context) {
+                    const datasetLabel = context.dataset.label;
+                    const point = context.raw;
+
+                    if (datasetLabel === 'Conflicts') {
+                        return `Time: ${point.x}, Machine: ${point.y}`;
+                    }
+
+                    return `Time: ${point.x[0]}-${point.x[1]}, Machine: ${point.y}`;
+                }
+            };
+
+
+            ganttCharts[0].data.datasets.push({
+                yAxisID: 'y_conflicts',
+                label: 'Conflicts',
+                data: conflictDots,
+                type: 'scatter',
+                pointRadius: 8,
+                hoverRadius: 8,
+                borderColor: '#000',
+                pointStyle: 'line',
+                rotation: 90,
+                borderWidth: 5,
+                hoverBorderWidth: 5,
+                showLine: false,
+                parsing: {
+                    xAxisKey: 'x',
+                    yAxisKey: 'y'
+                },
+                datalabels: {
+                    display: false
+                }
+            });
+        }
 
         machines.forEach(e => {
             e.lineupLabels.forEach((l, i) => {
@@ -1531,7 +1661,7 @@ window.onload = () => {
         if (changeovers.state == 1) {
             ganttCharts[1] = new Chart(
                 document.querySelector('#solution_ChangeoversGanttChart'),
-                createConfig()
+                createConfig(uniqueSortedMachines)
             );
 
             datasetLabels.length = 0;
@@ -1545,9 +1675,23 @@ window.onload = () => {
         }
 
         if (transports.state == 1) {
+            const transportJobsSet = new Set();
+
+            jobs.forEach(job => {
+                if (Array.isArray(job.transport) && job.transport.length > 0) {
+                    transportJobsSet.add("J" + job.ID);
+                }
+            });
+
+            const uniqueSortedJobs = Array.from(transportJobsSet).sort((a, b) => {
+                const aID = parseInt(a.slice(1), 10);
+                const bID = parseInt(b.slice(1), 10);
+                return aID - bID;
+            });
+
             ganttCharts[2] = new Chart(
                 document.querySelector('#solution_TransportGanttChart'),
-                createConfig()
+                createConfig(uniqueSortedJobs)
             );
 
             datasetLabels.length = 0;
@@ -1560,6 +1704,8 @@ window.onload = () => {
             });
         }
 
+        ganttCharts[0].update();
+
         function addData(chart, label, data, color) {
             const newData = {
                 label: label,
@@ -1570,7 +1716,6 @@ window.onload = () => {
             datasetLabels.push(label);
 
             chart.data.datasets.push(newData);
-            chart.update();
         }
 
         function randomColorGenerator() {
@@ -1823,8 +1968,8 @@ window.onload = () => {
             check(isInRange(v, 1, 15), `Wartość 'numberOfMachinesOfGivenType[${i}]' musi być całkowita z zakresu 1–15`));
 
         check(isArray(data.efficiencyCoefficient), "Brakuje tablicy 'efficiencyCoefficient'");
-        check(data.efficiencyCoefficient.length === nTypes,
-            `Tablica 'efficiencyCoefficient' ma długość ${data.efficiencyCoefficient.length}, oczekiwano ${nTypes}`);
+        check(data.efficiencyCoefficient.length === totalMachines,
+            `Tablica 'efficiencyCoefficient' ma długość ${data.efficiencyCoefficient.length}, oczekiwano ${totalMachines}`);
         data.efficiencyCoefficient.forEach((v, i) =>
             check(isEfficiencyValue(v), `Wartość 'efficiencyCoefficient[${i}]' musi być w zakresie (0, 1] z dokładnością do 2 miejsc po przecinku`));
 
@@ -1865,10 +2010,10 @@ window.onload = () => {
         // --- TRANSPORT ---
         check(["ON", "OFF"].includes(data.transportState), "'transportState' musi być ON albo OFF");
 
-        const transportSize = nTypes * nTypes;
+        const transportSize = totalMachines * totalMachines;
         check(isArray(data.transportTimes), "Brakuje tablicy 'transportTimes'");
         check(data.transportTimes.length === transportSize,
-            `Tablica 'transportTimes' ma długość ${data.transportTimes.length}, oczekiwano ${transportSize} (czyli ${nTypes} × ${nTypes})`);
+            `Tablica 'transportTimes' ma długość ${data.transportTimes.length}, oczekiwano ${transportSize} (czyli ${totalMachines} × ${totalMachines})`);
         data.transportTimes.forEach((v, i) =>
             check(isNonNegativeIntUnder1000(v), `Wartość 'transportTimes[${i}]' musi być całkowita z zakresu 0–1000`));
 
